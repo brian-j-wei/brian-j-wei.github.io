@@ -93,13 +93,148 @@ h2 {
   margin: 0;
   font-weight: normal;
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 22px;
+  font-size: 26px;
 }
 
 .papertitle {
   font-family: 'Lato', Verdana, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.btn-row.btn-row-center {
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  border: 1px solid #d8dce2;
+  background: #f7f8fa;
+  color: #1772d0;
+  text-decoration: none;
+  transition: background-color .15s ease-in-out, color .15s ease-in-out, border-color .15s ease-in-out;
+}
+
+.btn:hover,
+.btn:focus {
+  background: #1772d0;
+  border-color: #1772d0;
+  color: #fff;
+  text-decoration: none;
+}
+
+.btn-bibtex {
+  cursor: pointer;
+}
+
+.bibtex-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.bibtex-modal-overlay.open {
+  display: flex;
+}
+
+.bibtex-modal {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+
+.bibtex-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #777;
+  cursor: pointer;
+}
+
+.bibtex-modal-close:hover {
+  color: #1772d0;
+}
+
+.go-bibtex-box {
+  position: relative;
+  background: #f7f8fa;
+  border: 1px solid #e2e4e8;
+  border-radius: 6px;
+  padding: 18px;
+  margin-top: 8px;
+}
+
+.go-bibtex-box pre {
+  margin: 0;
+  font-size: 12.5px;
+  overflow-x: auto;
+  white-space: pre;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+}
+
+.bibtex-modal-copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #e2e4e8;
+  margin-bottom: 12px;
+}
+
+.site-nav-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  padding: 12px 16px;
+}
+
+.site-nav-inner a {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+}
+
+.site-nav-inner a:hover,
+.site-nav-inner a:focus {
+  color: #1772d0;
 }
 
 .name {

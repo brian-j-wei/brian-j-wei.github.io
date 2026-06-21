@@ -8,17 +8,27 @@
     <meta name="author" content="Brian Wei">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
-    
+
   </head>
 
   <body>
+    <nav class="site-nav">
+      <div class="site-nav-inner">
+        <a href="#about">About</a>
+        <a href="#research">Research</a>
+        <a href="#publications">Publications</a>
+        <a href="#projects">Projects</a>
+      </div>
+    </nav>
     <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
       <tr style="padding:0px">
         <td style="padding:0px">
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
             <tr style="padding:0px">
-              <td style="padding:2.5%;width:63%;vertical-align:middle">
+              <td id="about" style="padding:2.5%;width:63%;vertical-align:middle">
                 <p class="name" style="text-align: center;">
                 Brian Wei
                 </p>
@@ -27,12 +37,12 @@
                 where I'll be working in the <a href="https://mvrl.cse.wustl.edu/">Multimodal Vision Research Laboratory</a> led by <a href="https://jacobsn.github.io/">Dr. Nathan Jacobs</a>.
                 I was previously an undergraduate there studying Data Science and Economics, during which I conducted research advised by <a href="https://sds.wustl.edu/people/nan-lin">Dr. Nan Lin</a> and Dr. Jacobs.
                 </p>
-                <p style="text-align:center">
-                  <a href="mailto:b.j.wei@wustl.edu">Email</a> &nbsp;/&nbsp;
-                  <a href="data/bwei_CV_v2.pdf">CV</a> &nbsp;/&nbsp;
-                  <a href="https://scholar.google.com/citations?user=IrdziYUAAAAJ&hl=en">Scholar</a> &nbsp;/&nbsp;
-                  <a href="https://github.com/brian-j-wei">Github</a>
-                </p>
+                <div class="btn-row btn-row-center">
+                  <a class="btn" href="mailto:b.j.wei@wustl.edu"><i class="fas fa-envelope"></i> Email</a>
+                  <a class="btn" href="data/bwei_CV_v2.pdf"><i class="fas fa-file-alt"></i> CV</a>
+                  <a class="btn" href="https://scholar.google.com/citations?user=IrdziYUAAAAJ&hl=en"><i class="ai ai-google-scholar"></i> Scholar</a>
+                  <a class="btn" href="https://github.com/brian-j-wei"><i class="fab fa-github"></i> Github</a>
+                </div>
               </td>
               <td style="padding:2.5%;width:37%;max-width:37%">
                 <a href="images/pfp_nyhavn.jpg"><img style="width:100%;max-width:100%;object-fit: cover; border-radius: 50%;" alt="profile photo" src="images/pfp_nyhavn.jpg" class="hoverZoomLink"></a>
@@ -41,7 +51,7 @@
           </tbody></table>
 
           <!-- RESEARCH -->
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <table id="research" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
               <tr>
               <td style="padding:16px;width:100%;vertical-align:middle">
                 <h2>Research</h2>
@@ -55,8 +65,8 @@
 
           
           <!-- Publications -->
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-            <h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Publications</h2>
+          <table id="publications" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+            <h2 style="padding-left:16px;">Publications</h2>
 
 
             <tr>
@@ -68,9 +78,7 @@
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <a href="geodit-omega/index.html">
-                  <span class="papertitle">GeoDiT-&Omega;: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive</span>
-                </a>
+                <span class="papertitle">GeoDiT-&Omega;: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive</span>
                 <br>
                 <strong>Brian Wei*</strong>,
                 <a href="https://vishu26.github.io/">Srikumar Sastry*</a>,
@@ -79,9 +87,18 @@
                 <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
                 <br>
                 <em>ECCV</em>, 2026
-                <br>
-                <a href="geodit-omega/index.html">project page</a>
+                <div class="btn-row">
+                  <a class="btn" href="geodit-omega/index.html"><i class="fas fa-globe"></i> Website</a>
+                  <button class="btn btn-bibtex" type="button" data-bibtex="bibtex-geoditomega"><i class="fas fa-quote-right"></i> BibTeX</button>
+                </div>
                 <p>We propose GeoDiT-&Omega;, a diffusion transformer for satellite imagery that is promptable with any geospatial primitive&mdash;polygons, polylines, bounding boxes, and points&mdash;grounded in text.</p>
+                <pre id="bibtex-geoditomega" hidden>@inproceedings{wei2026geoditomega,
+  title     = {GeoDiT-&Omega;: Unified Spatial Control for Satellite Image
+               Synthesis with Any Geospatial Primitive},
+  author    = {Wei, Brian and Sastry, Srikumar and Cher, Dan and Xing, Eric and Jacobs, Nathan},
+  booktitle = {European Conference on Computer Vision},
+  year      = {2026}
+}</pre>
               </td>
             </tr>
 
@@ -104,7 +121,16 @@
                 <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
                 <br>
                 <em>ECCV</em>, 2026
+                <div class="btn-row">
+                  <button class="btn btn-bibtex" type="button" data-bibtex="bibtex-tte"><i class="fas fa-quote-right"></i> BibTeX</button>
+                </div>
                 <p>We introduce TTE, a geolocation encoder that learns representations by tessellating the Earth's sphere using Voronoi partitioning.</p>
+                <pre id="bibtex-tte" hidden>@inproceedings{cher2026tte,
+  title     = {Tesselating The Earth},
+  author    = {Cher, Dan and Iqbal, Hamza and Xing, Eric and Wei, Brian and Jacobs, Nathan},
+  booktitle = {European Conference on Computer Vision},
+  year      = {2026}
+}</pre>
               </td>
             </tr>
 
@@ -118,9 +144,7 @@
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <a href="https://arxiv.org/pdf/2511.07744">
-                  <span class="papertitle">VectorSynth: Fine-Grained Satellite Image Synthesis with Structured Semantics</span>
-                </a>
+                <span class="papertitle">VectorSynth: Fine-Grained Satellite Image Synthesis with Structured Semantics</span>
                 <br>
                 <a href="https://dcher95.github.io/">Dan Cher*</a>,
                 <strong>Brian Wei*</strong>,
@@ -128,13 +152,20 @@
                 <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
                 <br>
                 <em>WACV</em>, 2026
-                <br>
-                <a href="https://dcher95.github.io/VectorSynth/index.html">project page</a>
-                /
-                <a href="https://github.com/mvrl/VectorSynth">github</a>
-                /
-                <a href="https://arxiv.org/abs/2511.07744">arXiv</a>
-                <p>We introduce VectorSynth, a diffusion-based model that generates pixel-accurate satellite imagery from polygonal geographic annotations with semantic attributes, enabling spatially grounded, geometry- and language-guided image synthesis and editing.</p>
+                <div class="btn-row">
+                  <a class="btn" href="https://dcher95.github.io/VectorSynth/index.html"><i class="fas fa-globe"></i> Website</a>
+                  <a class="btn" href="https://arxiv.org/abs/2511.07744"><i class="ai ai-arxiv"></i> Paper</a>
+                  <a class="btn" href="https://github.com/mvrl/VectorSynth"><i class="fab fa-github"></i> Code</a>
+                  <button class="btn btn-bibtex" type="button" data-bibtex="bibtex-vectorsynth"><i class="fas fa-quote-right"></i> BibTeX</button>
+                </div>
+                <p>We introduce VectorSynth, a diffusion-based model that generates pixel-accurate satellite imagery from polygonal geographic annotations with semantic attributes.</p>
+                <pre id="bibtex-vectorsynth" hidden>@inproceedings{cher2026vectorsynth,
+  title     = {VectorSynth: Fine-Grained Satellite Image Synthesis with
+               Structured Semantics},
+  author    = {Cher, Dan and Wei, Brian and Sastry, Srikumar and Jacobs, Nathan},
+  booktitle = {Winter Conference on Applications of Computer Vision},
+  year      = {2026}
+}</pre>
               </td>
             </tr>
 
@@ -142,8 +173,8 @@
           </tbody></table>
 
           <!-- Projects -->
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-            <h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Projects</h2>
+          <table id="projects" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+            <h2 style="padding-left:16px;">Projects</h2>
 
 
             <tr>
@@ -160,10 +191,10 @@
                 </a>
                 <br>
                 Jan 2023 - Dec 2024
-                <br>
-                <a href="https://washurobotics.com/">website</a>
-                /
-                <a href="https://github.com/Washington-University-Robotics/Rover-Software">github</a>
+                <div class="btn-row">
+                  <a class="btn" href="https://washurobotics.com/"><i class="fas fa-globe"></i> Website</a>
+                  <a class="btn" href="https://github.com/Washington-University-Robotics/Rover-Software"><i class="fab fa-github"></i> Code</a>
+                </div>
                 <p>I served as Co-President of the WashU Robotics Club, following my role as software lead on the rover project. Check out the club website for a look at the projects I was fortunate to work on during my time there!</p>
               </td>
             </tr>
@@ -183,11 +214,70 @@
           <td style="padding:0px">
             <br>
             <p style="text-align:center;font-size:small;">
-              Thank you to <a href="https://github.com/jonbarron/jonbarron_website">Jon Barron</a> for the site template.
+              Adapted from <a href="https://github.com/jonbarron/jonbarron_website">Jon Barron</a>'s template.
             </p>
           </td>
         </tr>
       </tbody>
     </table>
+    <!-- BibTeX modal -->
+    <div class="bibtex-modal-overlay" id="bibtexModalOverlay">
+      <div class="bibtex-modal" role="dialog" aria-modal="true" aria-label="BibTeX citation">
+        <button class="bibtex-modal-close" id="bibtexModalClose" type="button" aria-label="Close">&times;</button>
+        <div class="go-bibtex-box">
+          <button class="btn bibtex-modal-copy" id="bibtexModalCopy" type="button">Copy</button>
+          <pre id="bibtexModalContent"></pre>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      const overlay = document.getElementById('bibtexModalOverlay');
+      const modalContent = document.getElementById('bibtexModalContent');
+      const closeBtn = document.getElementById('bibtexModalClose');
+      const copyBtn = document.getElementById('bibtexModalCopy');
+
+      function openModal(text) {
+        modalContent.textContent = text;
+        overlay.classList.add('open');
+      }
+      function closeModal() {
+        overlay.classList.remove('open');
+      }
+
+      document.querySelectorAll('.btn-bibtex').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const src = document.getElementById(btn.dataset.bibtex);
+          if (src) openModal(src.textContent.trim());
+        });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+      const fallbackCopy = (text) => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-9999px';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        } catch (e) {}
+      };
+      copyBtn.addEventListener('click', () => {
+        const text = modalContent.textContent.trim();
+        const showCopied = () => {
+          copyBtn.textContent = 'Copied';
+          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(() => { fallbackCopy(text); showCopied(); });
+        } else {
+          fallbackCopy(text); showCopied();
+        }
+      });
+    })();
+    </script>
   </body>
 </html>
