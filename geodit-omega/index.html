@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GeoDiT-Ω: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive">
+  <title>GeoDiT-Ω</title>
+
+  <link rel="shortcut icon" href="../images/favicon/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="static/css/geodit-omega.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     HERO
+     PLACEHOLDER: swap in final title / authors / links once paper is ready
+══════════════════════════════════════════════════════ -->
+<header class="go-hero" id="top">
+  <div class="go-container">
+    <h1 class="go-title">
+      <span class="method-name">GeoDiT-&Omega;</span>: Unified Spatial Control<br>
+      for Satellite Image Synthesis with Any <br> Geospatial Primitive
+    </h1>
+    <div class="go-venue">ECCV 2026</div>
+
+    <div class="go-authors">
+      <span><a href="https://brian-j-wei.github.io/" target="_blank">Brian Wei</a><sup>*</sup>,</span>
+      <span><a href="https://vishu26.github.io/" target="_blank">Srikumar Sastry</a><sup>*</sup>,</span>
+      <span><a href="https://dcher95.github.io/" target="_blank">Dan Cher</a><sup>*</sup>,</span>
+      <span><a href="https://ericx003.github.io/" target="_blank">Eric Xing</a>,</span>
+      <span><a href="https://jacobsn.github.io/" target="_blank">Nathan Jacobs</a></span>
+    </div>
+    <div class="go-affiliation">
+      Washington University in St. Louis
+    </div>
+    <div class="go-equal-contrib">
+      <sup>*</sup>Equal contribution
+    </div>
+
+    <div class="go-action-buttons">
+      <span class="go-btn go-btn-disabled">Paper <span class="placeholder">Coming Soon</span></span>
+      <span class="go-btn go-btn-disabled">arXiv <span class="placeholder">Coming Soon</span></span>
+      <span class="go-btn go-btn-disabled">Code <span class="placeholder">Coming Soon</span></span>
+      <span class="go-btn go-btn-disabled">
+        <img class="go-hf-logo" src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face">
+        Weights <span class="placeholder">Coming Soon</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     STICKY NAV
+══════════════════════════════════════════════════════ -->
+<nav class="go-nav">
+  <div class="go-nav-inner">
+    <a class="go-nav-brand" href="#top">GeoDiT-&Omega;</a>
+    <div class="go-nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#gallery">Results</a>
+      <a href="#method">Method</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     TEASER
+══════════════════════════════════════════════════════ -->
+<section class="go-section" id="teaser">
+  <div class="go-section-inner go-teaser-wrap">
+    <img src="static/images/teaser.png" alt="GeoDiT-Omega teaser figure">
+    <p class="go-teaser-caption">
+      GeoDiT-&Omega; enables precise synthesis using <span class="poly-red">polygons</span>,
+      <span class="line-yellow">polylines</span>, <span class="box-green">bounding boxes</span>,
+      <span class="point-blue">points</span>, along with text and geolocation conditioning.
+      This unified framework supports hierarchical composition and adapts to both high and low
+      annotation budgets.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     ABSTRACT
+══════════════════════════════════════════════════════ -->
+<section class="go-section alt-bg" id="abstract">
+  <div class="go-section-inner">
+    <h2 class="go-section-title">Abstract</h2>
+    <div class="go-section-subtitle">
+      TL;DR &mdash; GeoDiT-&Omega; is a single diffusion model that generates satellite imagery directly
+      from any geospatial primitive (polygons, polylines, boxes, or points), replacing task-specific pipelines with one
+      model that boosts downstream segmentation, detection, road extraction, and classification.
+    </div>
+    <p class="go-abstract-text">
+      Generative models have achieved remarkable progress, yet applying them to satellite imagery
+      remains challenging. Unlike natural imagery, satellite scenes are structured by spatially
+      complex and semantically distinct geometries. Prior work addresses this complexity by adapting
+      natural image frameworks using dense rasters or sparse prompts, trading off annotation cost and
+      fidelity while breaking compatibility with vector primitives commonly used to represent
+      geographic information. We introduce GeoDiT-&Omega;, a unified spatial control framework that
+      generates satellite imagery directly from any native geospatial primitive. By jointly leveraging
+      precise annotations (polygons, polylines) and coarser ones (bounding boxes, points), the model
+      supports controllable layouts across varying annotation budgets, broadening applicability to
+      design tasks such as urban planning while remaining naturally compatible with end-to-end GeoAI
+      workflows. To effectively leverage these primitives during generation, we propose
+      Geometry-Aware Local Attention, a conditioning mechanism that injects explicit geometric cues
+      into the attention space. Across all conditioning formats, our approach consistently outperforms
+      both dense-control and sparse-control baselines. Furthermore, the flexibility of using
+      primitives enables controllable synthetic data augmentation for <em>multiple</em> remote sensing
+      tasks where labeled scenes are costly to acquire. Using a single generative model rather than
+      task-specific pipelines, we improve performance on land-cover segmentation, object detection,
+      road graph extraction, and scene classification.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     RESULTS / GALLERY
+══════════════════════════════════════════════════════ -->
+<section class="go-section" id="gallery">
+  <div class="go-section-inner go-wide">
+    <h2 class="go-section-title">Results</h2>
+
+    <div class="go-method-figures">
+      <div class="go-method-figure">
+        <h3 class="go-subsec-title">Qualitative Samples</h3>
+        <img src="static/images/main_qual.jpg" alt="Qualitative samples from GeoDiT-Omega" style="max-width:85%;">
+        <p class="go-figure-caption">
+          Annotation complexity increases
+          top to bottom; contextual modalities (text, geolocation) are added left to right.
+          <span class="poly-red">Polygons</span> = building, <span class="line-yellow">polylines</span> = road,
+          <span class="box-green">boxes</span> = recreational, <span class="point-blue">points</span> = trees.
+        </p>
+      </div>
+      <div class="go-method-figure">
+        <h3 class="go-subsec-title">Downstream Task Synthesis</h3>
+        <img src="static/images/tasks.jpg" alt="GeoDiT-Omega synthetic samples on DIOR, OpenEarthMap, City-Scale, and AID">
+        <p class="go-figure-caption">
+          GeoDiT-&Omega; synthetic samples for four downstream tasks: (a) <strong>DIOR</strong> for
+          object detection, (b) <strong>OpenEarthMap</strong> for land-cover segmentation,
+          (c) <strong>City-Scale</strong> for road graph extraction, and (d) <strong>AID</strong>
+          for scene classification.
+        </p>
+      </div>
+    </div>
+
+    <h3 class="go-subsec-title">Quantitative Comparison</h3>
+    <p class="go-section-subtitle">
+      Zero-shot evaluation on <strong>Git-Rand-15k</strong> and <strong>Git-Dense-3.5k</strong>.
+      <strong>Bold</strong> is best, <u>underline</u> is second-best.
+      <em>T</em> = text, <em>L</em> = geolocation, <em>P</em> = points, <em>B</em> = bounding box,
+      <strong><em>&Omega;</em></strong> = {polygon, polyline, bounding box, point}.
+    </p>
+    <div class="go-results-table-wrap">
+      <table class="go-results-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="ta-left">Model</th>
+            <th rowspan="2">Condition</th>
+            <th colspan="3">Git-Rand-15k</th>
+            <th colspan="3">Git-Dense-3.5k</th>
+          </tr>
+          <tr>
+            <th>FID&darr;</th><th>sFID&darr;</th><th>LPIPS&darr;</th>
+            <th>FID&darr;</th><th>sFID&darr;</th><th>LPIPS&darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-start">
+            <td class="ta-left" colspan="8"><em>General Models</em></td>
+          </tr>
+          <tr>
+            <td class="ta-left">InstanceDiffusion</td><td><em>T+B</em></td>
+            <td>94.18</td><td>22.60</td><td>0.5975</td>
+            <td>112.35</td><td>29.93</td><td>0.5979</td>
+          </tr>
+          <tr>
+            <td class="ta-left">GLIGEN</td><td><em>T+B</em></td>
+            <td>54.00</td><td>10.82</td><td>0.4792</td>
+            <td>96.28</td><td>24.94</td><td>0.5256</td>
+          </tr>
+          <tr class="group-start">
+            <td class="ta-left" colspan="8"><em>Geospatial Models</em></td>
+          </tr>
+          <tr>
+            <td class="ta-left">GeoSynth</td><td><em>T</em></td>
+            <td>45.59</td><td>18.88</td><td>0.5413</td>
+            <td>83.90</td><td>22.26</td><td>0.5149</td>
+          </tr>
+          <tr>
+            <td class="ta-left">VectorSynth</td><td><em>T+O</em></td>
+            <td>95.15</td><td>35.49</td><td>0.4441</td>
+            <td>72.26</td><td>25.87</td><td>0.4505</td>
+          </tr>
+          <tr>
+            <td class="ta-left">Text2Earth<sup>*</sup></td><td><em>T</em></td>
+            <td>25.93</td><td>5.09</td><td>0.4269</td>
+            <td>40.23</td><td>17.37</td><td>0.4871</td>
+          </tr>
+          <tr>
+            <td class="ta-left">GeoDiT-&alpha;-XL</td><td><em>T</em></td>
+            <td>14.21</td><td>5.13</td><td>0.3972</td>
+            <td>29.76</td><td>17.94</td><td>0.4853</td>
+          </tr>
+          <tr>
+            <td class="ta-left">GeoDiT-&Sigma;-XL</td><td><em>T+P+L</em></td>
+            <td>12.01</td><td>5.09</td><td>0.3779</td>
+            <td>27.49</td><td>17.95</td><td>0.4692</td>
+          </tr>
+          <tr class="group-start ours">
+            <td class="ta-left" rowspan="3"><strong>GeoDiT-&Omega;-XL (Ours)</strong></td>
+            <td><em>T+P+L</em></td>
+            <td>9.91</td><td>4.63</td><td>0.3612</td>
+            <td>20.57</td><td>17.44</td><td>0.3876</td>
+          </tr>
+          <tr class="ours">
+            <td><em>T+B+L</em></td>
+            <td><u>9.72</u></td><td><u>4.45</u></td><td><u>0.3509</u></td>
+            <td><u>19.46</u></td><td><u>16.28</u></td><td><u>0.3594</u></td>
+          </tr>
+          <tr class="ours">
+            <td><em>T+&Omega;+L</em></td>
+            <td><strong>9.25</strong></td><td><strong>4.38</strong></td><td><strong>0.3438</strong></td>
+            <td><strong>18.20</strong></td><td><strong>16.21</strong></td><td><strong>0.3455</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-caption">
+      <sup>*</sup> Text2Earth was trained on the entire Git-10M dataset (including our held-out test
+      sets), which may inflate reported performance.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     METHOD
+══════════════════════════════════════════════════════ -->
+<section class="go-section alt-bg" id="method">
+  <div class="go-section-inner go-wide">
+    <h2 class="go-section-title">Method</h2>
+
+    <div class="go-method-figures">
+      <div class="go-method-figure">
+        <img src="static/images/unified_encoder.jpg" alt="GeoDiT-Omega unified primitive encoder">
+        <p class="go-figure-caption">
+          Overview of GeoDiT-&Omega; architecture.
+        </p>
+      </div>
+      <div class="go-method-figure">
+        <img src="static/images/gala.jpg" alt="Geometry-Aware Local Attention (GALA)">
+        <p class="go-figure-caption">
+          Geometry Aware Local Attention.
+        </p>
+      </div>
+    </div>
+
+    <div class="go-pipeline-steps">
+      <div class="go-pipeline-step">
+        <span class="go-step-num">1</span>
+        <h3>Encoding</h3>
+        <p>
+          Each scene instance can be described by any primitive format&mdash;polygon, polyline, box,
+          or point. A Unified Primitive Encoder turns each into a shared token: geometry is
+          Fourier-encoded and passed through an MLP, with the instance's text caption concatenated
+          in. Global text and geolocation context are added separately&mdash;captions via LongCLIP,
+          geolocation via RANGE.
+        </p>
+      </div>
+      <div class="go-pipeline-step">
+        <span class="go-step-num">2</span>
+        <h3>Conditioning (GALA)</h3>
+        <p>
+          Unified primitive tokens condition generation through Geometry-Aware Local Attention
+          (GALA): each token cross-attends to the diffusion transformer's visual tokens, then is
+          modulated by a learned RBF field (MetaRBF+) and a spatial geometry field&mdash;together
+          injecting a spatial inductive bias that adapts to each primitive's geometry. Global text
+          conditions the model via standard cross-attention; geolocation and timestep via adaptive
+          layer norm.
+        </p>
+      </div>
+      <div class="go-pipeline-step">
+        <span class="go-step-num">3</span>
+        <h3>Generation</h3>
+        <p>
+          The conditioned tokens drive a standard diffusion transformer denoising process to
+          produce the final satellite image.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     BIBTEX
+══════════════════════════════════════════════════════ -->
+<section class="go-section" id="bibtex">
+  <div class="go-section-inner">
+    <h2 class="go-section-title">BibTeX</h2>
+    <div class="go-bibtex-box">
+      <button class="go-bibtex-copy" id="bibtexCopy" type="button" title="Copy to clipboard">
+        Copy
+      </button>
+<pre id="bibtexContent">@inproceedings{wei2026geoditomega,
+  title     = {GeoDiT-&Omega;: Unified Spatial Control for Satellite Image
+               Synthesis with Any Geospatial Primitive},
+  author    = {Wei, Brian and Sastry, Srikumar and Cher, Dan and Xing, Eric and Jacobs, Nathan},
+  booktitle = {European Conference on Computer Vision},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════ -->
+<footer class="go-footer">
+</footer>
+
+<script>
+(function () {
+  const bibtexCopy = document.getElementById('bibtexCopy');
+  const bibtexContent = document.getElementById('bibtexContent');
+  if (!bibtexCopy || !bibtexContent) return;
+
+  const showCopied = () => {
+    bibtexCopy.classList.add('copied');
+    bibtexCopy.textContent = 'Copied';
+    setTimeout(() => {
+      bibtexCopy.classList.remove('copied');
+      bibtexCopy.textContent = 'Copy';
+    }, 1800);
+  };
+  const fallbackCopy = (text) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-9999px';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); showCopied();
+    } catch (e) {}
+  };
+  bibtexCopy.addEventListener('click', () => {
+    const text = bibtexContent.textContent.trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

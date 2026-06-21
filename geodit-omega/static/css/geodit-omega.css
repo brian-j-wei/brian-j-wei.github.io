@@ -1,0 +1,346 @@
+/* ── Fonts (matches main site) ───────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  --link-color: #1772d0;
+  --link-hover: #f09228;
+  --text-color: #222;
+  --muted-color: #555;
+  --bg-color: #ffffff;
+  --alt-bg-color: #f5f6f8;
+  --border-color: #e2e4e8;
+  --accent-color: #1772d0;
+  --max-width: 980px;
+  --narrow-width: 820px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  font-size: 15px;
+  color: var(--text-color);
+  background: var(--bg-color);
+  line-height: 1.6;
+}
+
+a { color: var(--link-color); text-decoration: none; }
+a:hover, a:focus { color: var(--link-hover); }
+
+/* ── PLACEHOLDER markers ─────────────────────────────── */
+.placeholder {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: #a05a00;
+  background: #fff3da;
+  border: 1px dashed #e0a73f;
+  border-radius: 4px;
+}
+.placeholder-block {
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #a05a00;
+  background: #fff3da;
+  border: 1px dashed #e0a73f;
+  border-radius: 6px;
+}
+.placeholder-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  color: #a05a00;
+  background: #fff3da;
+  border: 1px dashed #e0a73f;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ── HERO ─────────────────────────────────────────────── */
+.go-hero {
+  padding: 64px 24px 48px;
+  text-align: center;
+  background: linear-gradient(180deg, #fbfcfe 0%, var(--bg-color) 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+.go-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+.go-title {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 18px;
+}
+.go-title .method-name { color: #1a9850; }
+.go-venue {
+  display: block;
+  margin: 6px 0 22px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #d62728;
+  letter-spacing: .03em;
+}
+.go-authors {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.go-authors sup { font-size: 11px; }
+.go-affiliation {
+  font-size: 13px;
+  color: var(--muted-color);
+}
+.go-equal-contrib {
+  font-size: 12px;
+  color: var(--muted-color);
+  margin-bottom: 24px;
+}
+
+.go-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.go-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-color);
+  cursor: default;
+}
+.go-btn-disabled {
+  color: #999;
+  background: #f7f7f7;
+}
+.go-hf-logo {
+  width: 16px;
+  height: 16px;
+  opacity: .6;
+}
+
+/* ── STICKY NAV ───────────────────────────────────────── */
+.go-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-color);
+}
+.go-nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  font-size: 13px;
+}
+.go-nav-brand {
+  font-weight: 700;
+  color: var(--text-color);
+}
+.go-nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.go-nav-links a { color: var(--muted-color); font-weight: 700; }
+.go-nav-links a.active,
+.go-nav-links a:hover { color: var(--accent-color); }
+
+/* ── SECTIONS ─────────────────────────────────────────── */
+.go-section { padding: 48px 24px; }
+.go-section.alt-bg { background: var(--alt-bg-color); }
+.go-section-inner { max-width: var(--narrow-width); margin: 0 auto; }
+.go-section-inner.go-wide { max-width: var(--max-width); }
+
+.go-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.go-section-subtitle {
+  font-size: 14px;
+  color: var(--muted-color);
+  margin-bottom: 22px;
+}
+.go-subsec-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 30px 0 8px;
+}
+
+.go-abstract-text { font-size: 14.5px; }
+
+/* ── TEASER ───────────────────────────────────────────── */
+.go-teaser-wrap { text-align: center; }
+.go-teaser-wrap img {
+  max-width: 80%;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.go-teaser-caption {
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: var(--muted-color);
+  text-align: center;
+}
+.go-teaser-caption .poly-red   { color: #d62728; font-weight: 700; }
+.go-teaser-caption .line-yellow{ color: #b8960b; font-weight: 700; }
+.go-teaser-caption .box-green  { color: #1a9850; font-weight: 700; }
+.go-teaser-caption .point-blue { color: #1772d0; font-weight: 700; }
+
+/* ── METHOD FIGURES (side-by-side) ───────────────────── */
+.go-method-figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (max-width: 760px) {
+  .go-method-figures { grid-template-columns: 1fr; }
+}
+.go-method-figure { text-align: center; }
+.go-method-figure img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+}
+
+
+/* ── METHOD STEPS ─────────────────────────────────────── */
+.go-pipeline-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+@media (max-width: 760px) {
+  .go-pipeline-steps { grid-template-columns: 1fr; }
+}
+.go-pipeline-step {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px;
+}
+.go-pipeline-step h3 {
+  font-size: 14.5px;
+  margin: 10px 0 8px;
+}
+.go-pipeline-step p {
+  font-size: 13.5px;
+  color: var(--muted-color);
+  margin: 0;
+}
+.go-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── RESULT FIGURES ───────────────────────────────────── */
+.go-figure-wrap {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.go-figure-wrap img {
+  max-width: 75%;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.go-figure-caption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted-color);
+  text-align: center;
+}
+.go-figure-caption .poly-red   { color: #d62728; font-weight: 700; }
+.go-figure-caption .line-yellow{ color: #b8960b; font-weight: 700; }
+.go-figure-caption .box-green  { color: #1a9850; font-weight: 700; }
+.go-figure-caption .point-blue { color: #1772d0; font-weight: 700; }
+
+/* ── RESULTS TABLE ────────────────────────────────────── */
+.go-results-table-wrap { overflow-x: auto; margin-top: 12px; }
+.go-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 520px;
+}
+.go-results-table th, .go-results-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+.go-results-table th { font-weight: 700; background: var(--alt-bg-color); }
+.go-results-table .ta-left { text-align: left; }
+.go-results-table tr.group-start td { border-top: 2px solid var(--border-color); }
+.go-results-table tr.ours td { background: #eef6ff; }
+.go-results-table tr.ours.group-start td { border-top: 2px solid var(--accent-color); }
+.go-results-table em { font-style: italic; color: var(--muted-color); }
+.go-results-table td[colspan] em { color: var(--text-color); font-weight: 700; font-style: italic; }
+.table-caption {
+  font-size: 12px;
+  color: var(--muted-color);
+  margin-top: 10px;
+}
+
+/* ── BIBTEX ───────────────────────────────────────────── */
+.go-bibtex-box {
+  position: relative;
+  background: #f7f8fa;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px;
+}
+.go-bibtex-box pre {
+  margin: 0;
+  font-size: 12.5px;
+  overflow-x: auto;
+  white-space: pre;
+}
+.go-bibtex-copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Lato', Verdana, Helvetica, sans-serif;
+  color: var(--text-color);
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.go-bibtex-copy:hover { border-color: var(--accent-color); color: var(--accent-color); }
+.go-bibtex-copy.copied { color: #1a9850; border-color: #1a9850; }
+
+/* ── FOOTER ───────────────────────────────────────────── */
+.go-footer {
+  padding: 24px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted-color);
+  border-top: 1px solid var(--border-color);
+}
