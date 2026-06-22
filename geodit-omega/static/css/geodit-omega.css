@@ -121,6 +121,15 @@ a:hover, a:focus { color: var(--link-hover); }
   background: #fff;
   color: var(--text-color);
   cursor: default;
+  text-decoration: none;
+}
+a.go-btn {
+  cursor: pointer;
+}
+a.go-btn:hover,
+a.go-btn:focus {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 }
 .go-btn-disabled {
   color: #999;
