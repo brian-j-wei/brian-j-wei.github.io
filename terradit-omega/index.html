@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="GeoDiT-Ω: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive">
-  <title>GeoDiT-Ω</title>
+  <meta name="description" content="TerraDiT-Ω: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive">
+  <title>TerraDiT-Ω</title>
 
   <link rel="shortcut icon" href="../images/favicon/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="static/css/geodit-omega.css">
+  <link rel="stylesheet" href="static/css/terradit.css">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
 <header class="go-hero" id="top">
   <div class="go-container">
     <h1 class="go-title">
-      <span class="method-name">GeoDiT-&Omega;</span>: Unified Spatial Control<br>
+      <span class="method-name">TerraDiT-&Omega;</span>: Unified Spatial Control<br>
       for Satellite Image Synthesis with Any <br> Geospatial Primitive
     </h1>
     <div class="go-venue">ECCV 2026</div>
@@ -40,7 +40,7 @@
     <div class="go-action-buttons">
       <span class="go-btn go-btn-disabled">Paper <span class="placeholder">Coming Soon</span></span>
       <span class="go-btn go-btn-disabled">arXiv <span class="placeholder">Coming Soon</span></span>
-      <a class="go-btn" href="https://github.com/mvrl/GeoDiT" target="_blank">Code</a>
+      <a class="go-btn" href="https://github.com/mvrl/TerraDiT" target="_blank">Code</a>
       <span class="go-btn go-btn-disabled">
         <img class="go-hf-logo" src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face">
         Weights <span class="placeholder">Coming Soon</span>
@@ -54,7 +54,7 @@
 ══════════════════════════════════════════════════════ -->
 <nav class="go-nav">
   <div class="go-nav-inner">
-    <a class="go-nav-brand" href="#top">GeoDiT-&Omega;</a>
+    <a class="go-nav-brand" href="#top">TerraDiT-&Omega;</a>
     <div class="go-nav-links">
       <a href="#abstract">Abstract</a>
       <a href="#gallery">Results</a>
@@ -69,9 +69,9 @@
 ══════════════════════════════════════════════════════ -->
 <section class="go-section" id="teaser">
   <div class="go-section-inner go-teaser-wrap">
-    <img src="static/images/teaser.png" alt="GeoDiT-Omega teaser figure">
+    <img src="static/images/teaser.png" alt="TerraDiT-Omega teaser figure">
     <p class="go-teaser-caption">
-      GeoDiT-&Omega; enables precise synthesis using <span class="poly-red">polygons</span>,
+      TerraDiT-&Omega; enables precise synthesis using <span class="poly-red">polygons</span>,
       <span class="line-yellow">polylines</span>, <span class="box-green">bounding boxes</span>,
       <span class="point-blue">points</span>, along with text and geolocation conditioning.
       This unified framework supports hierarchical composition and adapts to both high and low
@@ -87,7 +87,7 @@
   <div class="go-section-inner">
     <h2 class="go-section-title">Abstract</h2>
     <div class="go-section-subtitle">
-      TL;DR &mdash; GeoDiT-&Omega; is a single diffusion model that generates satellite imagery directly
+      TL;DR &mdash; TerraDiT-&Omega; is a single diffusion model that generates satellite imagery directly
       from any geospatial primitive (polygons, polylines, boxes, or points), replacing task-specific pipelines with one
       model that boosts downstream segmentation, detection, road extraction, and classification.
     </div>
@@ -97,7 +97,7 @@
       complex and semantically distinct geometries. Prior work addresses this complexity by adapting
       natural image frameworks using dense rasters or sparse prompts, trading off annotation cost and
       fidelity while breaking compatibility with vector primitives commonly used to represent
-      geographic information. We introduce GeoDiT-&Omega;, a unified spatial control framework that
+      geographic information. We introduce TerraDiT-&Omega;, a unified spatial control framework that
       generates satellite imagery directly from any native geospatial primitive. By jointly leveraging
       precise annotations (polygons, polylines) and coarser ones (bounding boxes, points), the model
       supports controllable layouts across varying annotation budgets, broadening applicability to
@@ -124,7 +124,7 @@
     <div class="go-method-figures">
       <div class="go-method-figure">
         <h3 class="go-subsec-title">Qualitative Samples</h3>
-        <img src="static/images/main_qual.jpg" alt="Qualitative samples from GeoDiT-Omega" style="max-width:85%;">
+        <img src="static/images/main_qual.jpg" alt="Qualitative samples from TerraDiT-Omega" style="max-width:85%;">
         <p class="go-figure-caption">
           Annotation complexity increases
           top to bottom; contextual modalities (text, geolocation) are added left to right.
@@ -134,9 +134,9 @@
       </div>
       <div class="go-method-figure">
         <h3 class="go-subsec-title">Downstream Task Synthesis</h3>
-        <img src="static/images/tasks.jpg" alt="GeoDiT-Omega synthetic samples on DIOR, OpenEarthMap, City-Scale, and AID">
+        <img src="static/images/tasks.jpg" alt="TerraDiT-Omega synthetic samples on DIOR, OpenEarthMap, City-Scale, and AID">
         <p class="go-figure-caption">
-          GeoDiT-&Omega; synthetic samples for four downstream tasks: (a) <strong>DIOR</strong> for
+          TerraDiT-&Omega; synthetic samples for four downstream tasks: (a) <strong>DIOR</strong> for
           object detection, (b) <strong>OpenEarthMap</strong> for land-cover segmentation,
           (c) <strong>City-Scale</strong> for road graph extraction, and (d) <strong>AID</strong>
           for scene classification.
@@ -198,17 +198,17 @@
             <td>40.23</td><td>17.37</td><td>0.4871</td>
           </tr>
           <tr>
-            <td class="ta-left">GeoDiT-&alpha;-XL</td><td><em>T</em></td>
+            <td class="ta-left">TerraDiT-&alpha;-XL</td><td><em>T</em></td>
             <td>14.21</td><td>5.13</td><td>0.3972</td>
             <td>29.76</td><td>17.94</td><td>0.4853</td>
           </tr>
           <tr>
-            <td class="ta-left">GeoDiT-&Sigma;-XL</td><td><em>T+P+L</em></td>
+            <td class="ta-left">TerraDiT-&Sigma;-XL</td><td><em>T+P+L</em></td>
             <td>12.01</td><td>5.09</td><td>0.3779</td>
             <td>27.49</td><td>17.95</td><td>0.4692</td>
           </tr>
           <tr class="group-start ours">
-            <td class="ta-left" rowspan="3"><strong>GeoDiT-&Omega;-XL (Ours)</strong></td>
+            <td class="ta-left" rowspan="3"><strong>TerraDiT-&Omega;-XL (Ours)</strong></td>
             <td><em>T+P+L</em></td>
             <td>9.91</td><td>4.63</td><td>0.3612</td>
             <td>20.57</td><td>17.44</td><td>0.3876</td>
@@ -242,9 +242,9 @@
 
     <div class="go-method-figures">
       <div class="go-method-figure">
-        <img src="static/images/unified_encoder.jpg" alt="GeoDiT-Omega unified primitive encoder">
+        <img src="static/images/unified_encoder.jpg" alt="TerraDiT-Omega unified primitive encoder">
         <p class="go-figure-caption">
-          Overview of GeoDiT-&Omega; architecture.
+          Overview of TerraDiT-&Omega; architecture.
         </p>
       </div>
       <div class="go-method-figure">
@@ -301,8 +301,8 @@
       <button class="go-bibtex-copy" id="bibtexCopy" type="button" title="Copy to clipboard">
         Copy
       </button>
-<pre id="bibtexContent">@inproceedings{wei2026geoditomega,
-  title     = {GeoDiT-&Omega;: Unified Spatial Control for Satellite Image
+<pre id="bibtexContent">@inproceedings{wei2026terraditomega,
+  title     = {TerraDiT-&Omega;: Unified Spatial Control for Satellite Image
                Synthesis with Any Geospatial Primitive},
   author    = {Wei, Brian and Sastry, Srikumar and Cher, Daniel and Xing, Eric and Jacobs, Nathan},
   booktitle = {European Conference on Computer Vision},
