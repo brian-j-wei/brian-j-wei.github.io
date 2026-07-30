@@ -143,9 +143,9 @@
 
             <tr>
               <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
+                <div class="one hover-gif" data-static="images/points_sigma.jpg" data-gif="images/sigma_points.gif">
                   <div class="two" id='psm_image'>
-                    <img src='images/points_sigma.jpg'>
+                    <img src='images/points_sigma.jpg' alt="TerraDiT point-conditioned synthesis">
                   </div>
                 </div>
               </td>
@@ -317,6 +317,22 @@
         } else {
           fallbackCopy(text); showCopied();
         }
+      });
+
+      // Swap static image for an animated GIF on hover (restarts each time).
+      document.querySelectorAll('.hover-gif').forEach(container => {
+        const img = container.querySelector('img');
+        const staticSrc = container.dataset.static;
+        const gifSrc = container.dataset.gif;
+        if (!img || !gifSrc) return;
+        new Image().src = gifSrc; // preload
+        container.addEventListener('mouseenter', () => {
+          // Cache-busting param forces the GIF to restart from frame 0 on each hover.
+          img.src = gifSrc + '?t=' + Date.now();
+        });
+        container.addEventListener('mouseleave', () => {
+          img.src = staticSrc;
+        });
       });
     })();
     </script>
