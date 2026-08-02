@@ -12,6 +12,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheet.css?v=8">
 
+    <script type="importmap">
+    { "imports": { "three": "./tte-globe/js/three.module.js", "three/addons/": "./tte-globe/js/jsm/" } }
+    </script>
+
   </head>
 
   <body>
@@ -108,9 +112,10 @@
 
             <tr>
               <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one">
+                <div class="one" id="tte-globe-card">
                   <div class="two" id='psm_image'>
-                    <img src='images/tte.png'>
+                    <img src='images/tte.png' alt="Tessellating the Earth">
+                    <canvas id="tteGlobeCanvas" class="tte-globe-canvas"></canvas>
                   </div>
                 </div>
               </td>
@@ -334,6 +339,131 @@
           img.src = staticSrc;
         });
       });
+    })();
+    </script>
+
+    <!-- TTE hover globe: live three.js tessellation globe, lazily built on first hover -->
+    <script type="module">
+    (function () {
+      const card = document.getElementById('tte-globe-card');
+      const canvas = document.getElementById('tteGlobeCanvas');
+      if (!card || !canvas) return;
+
+      const DATA = 'tte-globe/data';
+      const GEOJSON = 'tte-globe/data/countries.geojson';
+      // "masked" = Land view (the linked look); switch to K1_atlas.png for the full globe.
+      const ATLAS = 'kfield_K1_atlas.png';
+
+      let started = false, hovering = false, ready = false;
+      let THREE, scene, cam, renderer, ctrl, fieldMat, epochTex = [], nEpochs = 1;
+      let playPos = 0, lastTime = performance.now();
+
+      // Equirectangular lon/lat -> sphere position (matches dcher's convention)
+      function ll(THREE, lon, lat, r) {
+        const B = lat * Math.PI / 180, L = lon * Math.PI / 180, cB = Math.cos(B);
+        return new THREE.Vector3(cB * Math.cos(L), Math.sin(B), -cB * Math.sin(L)).multiplyScalar(r);
+      }
+
+      function buildBoundaries(THREE, gj, r, color, opacity) {
+        const pts = [];
+        const push = (lo1, la1, lo2, la2) => {
+          if (Math.abs(lo2 - lo1) > 180) return; // skip antimeridian wrap
+          const n = Math.max(1, Math.ceil(Math.hypot(lo2 - lo1, la2 - la1) / 4));
+          for (let k = 0; k < n; k++) {
+            const t0 = k / n, t1 = (k + 1) / n;
+            pts.push(ll(THREE, lo1 + (lo2 - lo1) * t0, la1 + (la2 - la1) * t0, r));
+            pts.push(ll(THREE, lo1 + (lo2 - lo1) * t1, la1 + (la2 - la1) * t1, r));
+          }
+        };
+        for (const f of gj.features) {
+          const g = f.geometry; if (!g) continue;
+          const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+          for (const poly of polys) for (const ring of poly) for (let i = 0; i < ring.length - 1; i++)
+            push(ring[i][0], ring[i][1], ring[i + 1][0], ring[i + 1][1]);
+        }
+        return new THREE.LineSegments(
+          new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({ color, transparent: true, opacity })
+        );
+      }
+
+      async function init() {
+        THREE = await import('three');
+        const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+
+        const w = canvas.clientWidth || 160, h = canvas.clientHeight || 160;
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        // Supersample: render at up to 3x the small thumbnail box for crisp edges/texels.
+        renderer.setPixelRatio(Math.min(devicePixelRatio * 2, 3));
+        renderer.setSize(w, h, false);
+        renderer.setClearColor(0xffffff, 0);
+
+        scene = new THREE.Scene();
+        cam = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+        cam.position.set(0, 0, 2.9);
+
+        ctrl = new OrbitControls(cam, renderer.domElement);
+        ctrl.enableDamping = true; ctrl.minDistance = 1.6; ctrl.maxDistance = 6;
+        ctrl.autoRotate = true; ctrl.autoRotateSpeed = 0.6; ctrl.enablePan = false;
+
+        fieldMat = new THREE.MeshBasicMaterial({ color: 0xeeeeee });
+        scene.add(new THREE.Mesh(new THREE.SphereGeometry(1, 96, 72), fieldMat));
+
+        const [man, gj] = await Promise.all([
+          fetch(`${DATA}/manifest.json`).then(r => r.json()),
+          fetch(GEOJSON).then(r => r.json())
+        ]);
+        scene.add(buildBoundaries(THREE, gj, 1.002, 0x44505f, 0.5));
+
+        // Slice the vertical atlas film-strip into one texture per training epoch.
+        const KW = man.kfields.grid.w, KH = man.kfields.grid.h;
+        nEpochs = man.kfields.epochs.length;
+        const maxAniso = renderer.capabilities.getMaxAnisotropy();
+        const img = new Image();
+        img.src = `${DATA}/${ATLAS}`;
+        await img.decode();
+        for (let f = 0; f < nEpochs; f++) {
+          const c = document.createElement('canvas'); c.width = KW; c.height = KH;
+          c.getContext('2d').drawImage(img, 0, f * KH, KW, KH, 0, 0, KW, KH);
+          const t = new THREE.CanvasTexture(c);
+          t.colorSpace = THREE.SRGBColorSpace;
+          t.anisotropy = maxAniso;                 // crisp texels at grazing angles
+          t.minFilter = THREE.LinearMipmapLinearFilter;
+          t.magFilter = THREE.LinearFilter;
+          t.generateMipmaps = true;
+          epochTex.push(t);
+        }
+        fieldMat.map = epochTex[0]; fieldMat.needsUpdate = true;
+
+        ready = true;
+        lastTime = performance.now();
+        loop(lastTime);
+      }
+
+      function loop(now) {
+        if (!hovering && ready) { // pause work while not hovered
+          renderer.render(scene, cam);
+          return; // stop the RAF chain until next hover
+        }
+        requestAnimationFrame(loop);
+        if (ready) {
+          // advance ~8s per full training sweep, then loop
+          playPos += (now - lastTime) * (nEpochs - 1) / 8000;
+          if (playPos >= nEpochs - 1) playPos -= (nEpochs - 1);
+          const t = epochTex[Math.min(Math.round(playPos), nEpochs - 1)];
+          if (fieldMat.map !== t) { fieldMat.map = t; fieldMat.needsUpdate = true; }
+          ctrl.update();
+          renderer.render(scene, cam);
+        }
+        lastTime = now;
+      }
+
+      card.addEventListener('mouseenter', () => {
+        hovering = true;
+        if (!started) { started = true; init().catch(e => console.error('TTE globe:', e)); return; }
+        if (ready) { lastTime = performance.now(); requestAnimationFrame(loop); }
+      });
+      card.addEventListener('mouseleave', () => { hovering = false; });
     })();
     </script>
   </body>
