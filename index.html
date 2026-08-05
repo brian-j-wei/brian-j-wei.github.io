@@ -75,9 +75,11 @@
 
             <tr>
               <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one" style="text-align:center;">
+                <div class="one" id="omega-anim-card" style="text-align:center;">
                   <div class="two" id='psm_image'>
-                    <img src='images/omega_teaser.png'>
+                    <img src='images/omega_teaser.png' alt="TerraDiT-&Omega;">
+                    <video class="omega-anim" src="images/omega_anim.mp4"
+                           muted loop playsinline preload="none"></video>
                   </div>
                 </div>
               </td>
@@ -337,6 +339,18 @@
         container.addEventListener('mouseleave', () => {
           img.src = staticSrc;
         });
+      });
+
+      // Hover video loops (TerraDiT-Omega): load lazily, restart from frame 0 each hover.
+      document.querySelectorAll('.omega-anim').forEach(video => {
+        const card = video.closest('.one');
+        if (!card) return;
+        card.addEventListener('mouseenter', () => {
+          video.currentTime = 0;
+          const p = video.play();
+          if (p) p.catch(() => {}); // autoplay policy / not-yet-loaded: ignore
+        });
+        card.addEventListener('mouseleave', () => video.pause());
       });
     })();
     </script>

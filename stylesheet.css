@@ -266,7 +266,7 @@ h2 {
   height: 100%;
   object-fit: contain;
   border-radius: 12px;
-  transition: box-shadow .2s ease-in-out;
+  transition: box-shadow .2s ease-in-out, opacity .2s ease-in-out;
 }
 
 .one:hover .two {
@@ -297,6 +297,29 @@ h2 {
 }
 
 #tte-globe-card:hover .two img {
+  opacity: 0;
+}
+
+/* TerraDiT-Omega hover animation: cross-faded slide loop, revealed on hover */
+.omega-anim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease-in-out;
+  background: #fff;
+}
+
+#omega-anim-card:hover .omega-anim {
+  opacity: 1;
+}
+
+#omega-anim-card:hover .two > img {
   opacity: 0;
 }
 
