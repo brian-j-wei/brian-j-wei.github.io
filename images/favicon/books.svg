@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Stack of books: three volumes with alternating offsets so the pile reads
+       as stacked books rather than a symmetric rack. Tuned to stay legible at 16px. -->
+  <g stroke="#1772d0" stroke-width="4" stroke-linejoin="round" fill="none">
+    <!-- bottom book, widest, shifted left -->
+    <rect x="6"  y="42" width="48" height="13" rx="2"/>
+    <!-- middle book, shifted right -->
+    <rect x="14" y="27.5" width="44" height="13" rx="2"/>
+    <!-- top book, shifted left -->
+    <rect x="9"  y="13" width="42" height="13" rx="2"/>
+  </g>
+  <!-- spine bands, following each book's offset -->
+  <g fill="#1772d0">
+    <rect x="14" y="45.5" width="4" height="6" rx="1"/>
+    <rect x="22" y="31"   width="4" height="6" rx="1"/>
+    <rect x="17" y="16.5" width="4" height="6" rx="1"/>
+  </g>
+</svg>

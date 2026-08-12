@@ -187,6 +187,12 @@ h2 {
   font-size: 32px;
 }
 
+.equal-contrib-note {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: #555;
+}
+
 .one {
   width: 160px;
   height: 160px;
