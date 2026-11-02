@@ -45,6 +45,26 @@ h2 {
   font-weight: 700;
 }
 
+.tldr {
+  background: #fff6d6;
+  border: 1px solid #f0dc9c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 8px 0 0;
+}
+
+#publications td,
+#publications a,
+#publications strong,
+#publications .papertitle,
+.tldr {
+  font-size: 13px;
+}
+
+#publications .btn {
+  font-size: 11px;
+}
+
 .btn-row {
   display: flex;
   flex-wrap: wrap;
@@ -59,9 +79,9 @@ h2 {
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 14px;
-  border-radius: 4px;
+  gap: 0.45em;
+  padding: 0.25em 1.1em;
+  border-radius: 0.3em;
   font-size: 13px;
   font-weight: 700;
   font-family: var(--font-sans);
