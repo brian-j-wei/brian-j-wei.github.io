@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheet.css?v=15">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css?v=16">
 
     <script type="importmap">
     { "imports": { "three": "./tte-globe/js/three.module.js", "three/addons/": "./tte-globe/js/jsm/" } }
@@ -42,7 +42,7 @@
                 Brian Wei
                 </p>
                 <p>
-                I'm a PhD student at <a href="https://washu.edu/">Washington University in St. Louis</a> in Computer Science,
+                I'm a first-year PhD student at <a href="https://washu.edu/">Washington University in St. Louis</a> in Computer Science,
                 where I am an <a href="https://ai-access.wustl.edu/">AI-ACCESS fellow</a>. I am working in the <a href="https://mvrl.washu.edu/">Multimodal Vision Research Laboratory</a> led by <a href="https://jacobsn.github.io/">Dr. Nathan Jacobs</a>.
                 I was previously an undergraduate there studying Data Science and Economics, during which I conducted research advised by <a href="https://sds.wustl.edu/people/nan-lin">Dr. Nan Lin</a> and Dr. Jacobs.
                 </p>
@@ -74,24 +74,67 @@
 
           
           <!-- Publications -->
-          <table id="publications" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <table id="publications" class="show-selected" style="width:100%;border:0px;border-spacing:0 14px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
             <tr>
               <td colspan="2" style="padding:16px 4px 8px;">
-                <h2>Publications</h2>
-                <p class="equal-contrib-note">* Equal contribution</p>
+                <div class="pub-head">
+                  <h2>Publications</h2>
+                  <div class="pub-toggle" role="group" aria-label="Show publications">
+                    <button type="button" class="pub-toggle-btn" data-filter="selected" aria-pressed="true">Selected</button>
+                    <button type="button" class="pub-toggle-btn" data-filter="all" aria-pressed="false">All</button>
+                  </div>
+                </div>
               </td>
             </tr>
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one hover-gif" data-static="images/chronosphere_teaser.png" data-gif="images/chronosphere_mixture_fields.png">
+            <tr class="pub pub-selected">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one hover-video">
                   <div class="two" id='psm_image'>
-                    <img src='images/chronosphere_teaser.png' alt="Chronosphere">
+                    <img width="480" height="168" src='images/thumbs/teaser_flow_compact.webp' alt="X Marks the Spot">
+                    <video width="480" height="190" class="hover-anim" src="images/thumbs/teaser_flow.mp4"
+                           muted loop playsinline preload="none"></video>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">Chronosphere: Space-Time Tessellation of Local Climate Experts</span>
+                <a href="https://arxiv.org/abs/2611.13180"><span class="papertitle">X Marks the Spot: Diffusion for Image Geolocalization with Location Representations</span></a>
+                <br>
+                <strong>Brian Wei</strong>,
+                <a href="https://leohsuprogramminglab.github.io/">Leo Hsu</a>,
+                <a href="https://humblegamer.github.io/">Tianyi Gao</a>,
+                <a href="https://dcher95.github.io/">Dan Cher</a>,
+                <a href="https://ericx003.github.io/">Eric Xing</a>,
+                <a href="https://danni-beaulieu.github.io/">Danni Beaulieu</a>,
+                <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
+                <br>
+                <em>arXiv preprint</em>, 2026
+                <div class="btn-row">
+                  <a class="btn" href="https://arxiv.org/abs/2611.13180"><i class="ai ai-arxiv"></i> Paper</a>
+                  <button class="btn btn-bibtex" type="button" data-bibtex="bibtex-xmarks"><i class="fas fa-quote-right"></i> BibTeX</button>
+                </div>
+                <p class="tldr">We propose DIG, a generative model that predicts image geolocations by diffusing in a latent space of location representations, which are then decoded to coordinates.</p>
+                <pre id="bibtex-xmarks" hidden>@article{wei2026dig,
+  title     = {X Marks the Spot: Diffusion for Image Geolocalization with Location Representations},
+  author    = {Wei, Brian and Hsu, Chih-Chuan and Gao, Tianyi and Cher, Daniel and Xing, Eric and Beaulieu, Danielle and Jacobs, Nathan},
+  journal   = {arXiv preprint arXiv:2611.13180},
+  year      = {2026}
+}</pre>
+              </td>
+            </tr>
+
+
+            <tr class="pub">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one hover-video">
+                  <div class="two" id='psm_image'>
+                    <img width="480" height="250" src='images/thumbs/chronosphere_teaser.webp' alt="Chronosphere">
+                    <img width="480" height="268" class="hover-anim" src='images/thumbs/chronosphere_mixture_fields.webp' alt="">
+                  </div>
+                </div>
+              </td>
+              <td style="padding:20px;width:75%;vertical-align:middle">
+                <a href="https://arxiv.org/abs/2609.21872"><span class="papertitle">Chronosphere: Space-Time Tessellation of Local Climate Experts</span></a>
                 <br>
                 <a href="https://dcher95.github.io/">Dan Cher</a>,
                 <a href="https://ericx003.github.io/">Eric Xing</a>,
@@ -116,16 +159,16 @@
             </tr>
 
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
+            <tr class="pub">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one">
                   <div class="two" id='psm_image'>
-                    <img src='images/genesis.png' alt="Genesis">
+                    <img width="480" height="243" src='images/thumbs/genesis.webp' alt="Genesis">
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">Genesis: A Generative Engine for Hierarchical Satellite Image Synthesis</span>
+                <a href="https://subash-khanal.github.io/genesis/"><span class="papertitle">Genesis: A Generative Engine for Hierarchical Satellite Image Synthesis</span></a>
                 <br>
                 <a href="https://subash-khanal.github.io/">Subash Khanal</a>,
                 <a href="https://www.linkedin.com/in/yangzhi-cui/">Yangzhi Cui</a>,
@@ -154,20 +197,20 @@
             </tr>
 
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one" id="omega-anim-card" style="text-align:center;">
+            <tr class="pub pub-selected">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one hover-video" id="omega-anim-card" style="text-align:center;">
                   <div class="two" id='psm_image'>
-                    <img src='images/omega_teaser.png' alt="TerraDiT-&Omega;">
-                    <video class="omega-anim" src="images/omega_anim.mp4"
+                    <img width="480" height="216" src='images/thumbs/omega_teaser.webp' alt="TerraDiT-&Omega;">
+                    <video width="900" height="482" class="hover-anim" src="images/omega_anim.mp4"
                            muted loop playsinline preload="none"></video>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">TerraDiT-&Omega;: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive</span>
+                <a href="terradit-omega/index.html"><span class="papertitle">TerraDiT-&Omega;: Unified Spatial Control for Satellite Image Synthesis with Any Geospatial Primitive</span></a>
                 <br>
-                <strong>Brian Wei*</strong>,
+                <strong>Brian Wei</strong>*,
                 <a href="https://vishu26.github.io/">Srikumar Sastry*</a>,
                 <a href="https://dcher95.github.io/">Dan Cher*</a>,
                 <a href="https://ericx003.github.io/">Eric Xing</a>,
@@ -193,17 +236,17 @@
             </tr>
 
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
+            <tr class="pub">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one" id="tte-globe-card">
                   <div class="two" id='psm_image'>
-                    <img src='images/tte.png' alt="Tessellating the Earth">
+                    <img width="480" height="452" src='images/thumbs/tte.webp' alt="Tessellating the Earth">
                     <canvas id="tteGlobeCanvas" class="tte-globe-canvas"></canvas>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">Tesselating The Earth</span>
+                <a href="https://dcher95.github.io/TTE/index.html"><span class="papertitle">Tesselating The Earth</span></a>
                 <br>
                 <a href="https://dcher95.github.io/">Dan Cher</a>,
                 <a href="https://1hamzaiqbal.github.io/">Hamza Iqbal</a>,
@@ -230,20 +273,22 @@
             </tr>
 
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
-                <div class="one hover-gif" data-static="images/points_sigma.jpg" data-gif="images/sigma_points.gif">
+            <tr class="pub pub-selected">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one hover-video">
                   <div class="two" id='psm_image'>
-                    <img src='images/points_sigma.jpg' alt="TerraDiT point-conditioned synthesis">
+                    <img width="480" height="276" src='images/thumbs/points_sigma.jpg' alt="TerraDiT point-conditioned synthesis">
+                    <video width="480" height="214" class="hover-anim" src="images/thumbs/sigma_points.mp4"
+                           muted loop playsinline preload="none"></video>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">TerraDiT: Point-Conditioned Diffusion Transformer for Satellite Image Synthesis</span>
+                <a href="https://vishu26.github.io/terradit/index.html"><span class="papertitle">TerraDiT: Point-Conditioned Diffusion Transformer for Satellite Image Synthesis</span></a>
                 <br>
                 <a href="https://vishu26.github.io/">Srikumar Sastry*</a>,
                 <a href="https://dcher95.github.io/">Dan Cher*</a>,
-                <strong>Brian Wei*</strong>,
+                <strong>Brian Wei</strong>*,
                 <a href="https://sites.wustl.edu/aayush/">Aayush Dhakal</a>,
                 <a href="https://subash-khanal.github.io/">Subash Khanal</a>,
                 <a href="https://splashing23.github.io/">Dev Gupta</a>,
@@ -257,7 +302,7 @@
                   <a class="btn" href="https://huggingface.co/MVRL/TerraDiT">🤗 Models</a>
                   <button class="btn btn-bibtex" type="button" data-bibtex="bibtex-terradit"><i class="fas fa-quote-right"></i> BibTeX</button>
                 </div>
-                <p class="tldr">We propose TerraDiT, a diffusion transformer for satellite image synthesis conditioned on sparse point locations and text — enabling annotation-efficient, spatially precise generation without dense pixel-level maps.</p>
+                <p class="tldr">We propose TerraDiT, a diffusion transformer for satellite image synthesis conditioned on sparse point prompts that enable annotation-efficient, spatially precise generation.</p>
                 <pre id="bibtex-terradit" hidden>@article{sastry2026terradit,
   title     = {TerraDiT: Point-Conditioned Diffusion Transformer for Satellite Image Synthesis},
   author    = {Sastry, Srikumar and Cher, Daniel and Wei, Brian and Dhakal, Aayush and Khanal, Subash and Gupta, Dev and Jacobs, Nathan},
@@ -268,19 +313,19 @@
             </tr>
 
 
-            <tr>
-              <td style="padding:20px;width:25%;vertical-align:middle">
+            <tr class="pub pub-selected">
+              <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one">
                   <div class="two" id='psm_image'>
-                    <img src='images/vectorsynth_teaser.png'>
+                    <img width="480" height="228" src='images/thumbs/vectorsynth_teaser.webp'>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">VectorSynth: Fine-Grained Satellite Image Synthesis with Structured Semantics</span>
+                <a href="https://dcher95.github.io/VectorSynth/index.html"><span class="papertitle">VectorSynth: Fine-Grained Satellite Image Synthesis with Structured Semantics</span></a>
                 <br>
                 <a href="https://dcher95.github.io/">Dan Cher*</a>,
-                <strong>Brian Wei*</strong>,
+                <strong>Brian Wei</strong>*,
                 <a href="https://vishu26.github.io/">Srikumar Sastry</a>,
                 <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
                 <br>
@@ -318,12 +363,12 @@
               <td style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one">
                   <div class="two" id='psm_image'>
-                    <img src='images/robotics_teaser.jpg'>
+                    <img width="480" height="468" src='images/thumbs/robotics_teaser.jpg'>
                   </div>
                 </div>
               </td>
               <td style="padding:20px;width:75%;vertical-align:middle">
-                <span class="papertitle">WashU Robotics Club</span>
+                <a href="https://washurobotics.com/"><span class="papertitle">WashU Robotics Club</span></a>
                 <br>
                 Jan 2023 - Dec 2024
                 <div class="btn-row">
@@ -421,17 +466,17 @@
         if (!img || !gifSrc) return;
         new Image().src = gifSrc; // preload
         container.addEventListener('mouseenter', () => {
-          // Cache-busting param forces the GIF to restart from frame 0 on each hover.
-          img.src = gifSrc + '?t=' + Date.now();
+          // For GIFs, a cache-busting param forces a restart from frame 0 on each hover.
+          img.src = /\.gif$/i.test(gifSrc) ? gifSrc + '?t=' + Date.now() : gifSrc;
         });
         container.addEventListener('mouseleave', () => {
           img.src = staticSrc;
         });
       });
 
-      // Hover video loops (TerraDiT-Omega): load lazily, restart from frame 0 each hover.
-      document.querySelectorAll('.omega-anim').forEach(video => {
-        const card = video.closest('.one');
+      // Hover video loops (.hover-video cards): load lazily, restart from frame 0 each hover.
+      document.querySelectorAll('video.hover-anim').forEach(video => {
+        const card = video.closest('td.pub-teaser') || video.closest('.one'); // whole teaser panel triggers it
         if (!card) return;
         card.addEventListener('mouseenter', () => {
           video.currentTime = 0;
@@ -439,6 +484,16 @@
           if (p) p.catch(() => {}); // autoplay policy / not-yet-loaded: ignore
         });
         card.addEventListener('mouseleave', () => video.pause());
+      });
+
+      // Publications filter: Selected vs. All (selected rows have class "pub-selected").
+      const pubTable = document.getElementById('publications');
+      const pubButtons = document.querySelectorAll('.pub-toggle-btn');
+      pubButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          pubTable.classList.toggle('show-selected', btn.dataset.filter === 'selected');
+          pubButtons.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        });
       });
     })();
     </script>
@@ -449,6 +504,7 @@
       const card = document.getElementById('tte-globe-card');
       const canvas = document.getElementById('tteGlobeCanvas');
       if (!card || !canvas) return;
+      const hoverArea = card.closest('td.pub-teaser') || card; // whole teaser panel triggers the globe
 
       const DATA = 'tte-globe/data';
       const GEOJSON = 'tte-globe/data/countries.geojson';
@@ -559,12 +615,12 @@
         lastTime = now;
       }
 
-      card.addEventListener('mouseenter', () => {
+      hoverArea.addEventListener('mouseenter', () => {
         hovering = true;
         if (!started) { started = true; init().catch(e => console.error('TTE globe:', e)); return; }
         if (ready) { lastTime = performance.now(); requestAnimationFrame(loop); }
       });
-      card.addEventListener('mouseleave', () => { hovering = false; });
+      hoverArea.addEventListener('mouseleave', () => { hovering = false; });
     })();
     </script>
   </body>

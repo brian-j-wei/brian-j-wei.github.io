@@ -46,11 +46,8 @@ h2 {
 }
 
 .tldr {
-  background: #fff6d6;
-  border: 1px solid #f0dc9c;
-  border-radius: 6px;
-  padding: 6px 10px;
   margin: 8px 0 0;
+  color: #555;
 }
 
 #publications td,
@@ -63,6 +60,22 @@ h2 {
 
 #publications .btn {
   font-size: 11px;
+}
+
+/* My name in author lists: bold + underlined */
+#publications strong {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Author names: plain text colour (still links, orange on hover). Titles stay blue. */
+#publications td > a:not(:has(.papertitle)) {
+  color: inherit;
+}
+
+#publications td > a:not(:has(.papertitle)):hover,
+#publications td > a:not(:has(.papertitle)):focus {
+  color: #f09228;
 }
 
 .btn-row {
@@ -207,31 +220,108 @@ h2 {
   font-size: 32px;
 }
 
+/* Publication cards: one rounded box per row; white teaser cell | off-white text cell */
+#publications {
+  --pub-card-border: #dcdfe4;
+  --pub-card-text-bg: #faf9f6;
+  --pub-card-radius: 14px;
+}
+
+#publications tr.pub > td {
+  border-top: 1px solid var(--pub-card-border);
+  border-bottom: 1px solid var(--pub-card-border);
+}
+
+#publications tr.pub > td:first-child {
+  background: #fff;
+  border-left: 1px solid var(--pub-card-border);
+  border-right: 1px solid var(--pub-card-border); /* divider between teaser and text */
+  border-radius: var(--pub-card-radius) 0 0 var(--pub-card-radius);
+}
+
+#publications tr.pub > td:last-child {
+  background: var(--pub-card-text-bg);
+  border-right: 1px solid var(--pub-card-border);
+  border-radius: 0 var(--pub-card-radius) var(--pub-card-radius) 0;
+}
+
+/* Publications heading with Selected / All toggle */
+.pub-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.pub-head h2 {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pub-toggle {
+  display: inline-flex;
+  border: 1px solid #d8dce2;
+  border-radius: 0.3em;
+  overflow: hidden;
+  background: #f7f8fa;
+}
+
+.pub-toggle-btn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.3em 0.9em;
+  border: 0;
+  background: transparent;
+  color: #1772d0;
+  cursor: pointer;
+  transition: background-color .15s ease-in-out, color .15s ease-in-out;
+}
+
+.pub-toggle-btn + .pub-toggle-btn {
+  border-left: 1px solid #d8dce2;
+}
+
+.pub-toggle-btn:hover {
+  background: #e9eef5;
+}
+
+.pub-toggle-btn[aria-pressed="true"] {
+  background: #1772d0;
+  color: #fff;
+}
+
+#publications.show-selected tr.pub:not(.pub-selected) {
+  display: none;
+}
+
 .equal-contrib-note {
   margin: 8px 0 0;
   font-size: 11px;
   color: #555;
 }
 
+/* Teaser: fixed width, height follows the image's aspect ratio */
 .one {
   width: 160px;
-  height: 160px;
   position: relative;
 }
 
 .two {
-  width: 160px;
-  height: 160px;
-  position: absolute;
+  width: 100%;
+  position: relative;
   transition: opacity .2s ease-in-out, transform .2s ease-in-out;
   -moz-transition: opacity .2s ease-in-out, transform .2s ease-in-out;
   -webkit-transition: opacity .2s ease-in-out, transform .2s ease-in-out;
 }
 
 .two img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   border-radius: 12px;
   transition: box-shadow .2s ease-in-out, opacity .2s ease-in-out;
 }
@@ -243,6 +333,39 @@ h2 {
 
 .one:hover .two img {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* Publications: the whole white teaser panel pops out (instead of just the image) */
+#publications tr.pub > td.pub-teaser {
+  position: relative;
+  transition: transform .2s ease-in-out, box-shadow .2s ease-in-out, border-radius .2s ease-in-out;
+}
+
+#publications tr.pub > td.pub-teaser:hover {
+  transform: scale(1.25);
+  z-index: 10;
+  border-radius: var(--pub-card-radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+#publications .one:hover .two {
+  transform: none;
+}
+
+#publications .one:hover .two img {
+  box-shadow: none;
+}
+
+/* Inside the rounded panel, teaser images and hover overlays keep square corners */
+#publications .two img,
+#publications .hover-anim {
+  border-radius: 0;
+}
+
+/* TTE teaser is nearly square, so show it a bit smaller */
+#tte-globe-card {
+  width: 125px;
+  margin: 0 auto;
 }
 
 /* TTE hover globe: canvas overlays the thumbnail, revealed on hover */
@@ -259,22 +382,25 @@ h2 {
   background: #fff;
 }
 
+.pub-teaser:hover #tte-globe-card .tte-globe-canvas,
 #tte-globe-card:hover .tte-globe-canvas {
   opacity: 1;
 }
 
+.pub-teaser:hover #tte-globe-card .two img,
 #tte-globe-card:hover .two img {
   opacity: 0;
 }
 
-/* TerraDiT-Omega hover animation: cross-faded slide loop, revealed on hover */
-.omega-anim {
+/* Hover overlay (.hover-video card): video or image shown over the teaser on hover.
+   Full width, vertically centred; may extend slightly past the teaser if it is taller. */
+.hover-anim {
   position: absolute;
-  top: 0;
+  top: 50%;
   left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
+  transform: translateY(-50%);
   border-radius: 12px;
   opacity: 0;
   pointer-events: none;
@@ -282,11 +408,13 @@ h2 {
   background: #fff;
 }
 
-#omega-anim-card:hover .omega-anim {
+.pub-teaser:hover .hover-video .hover-anim,
+.hover-video:hover .hover-anim {
   opacity: 1;
 }
 
-#omega-anim-card:hover .two > img {
+.pub-teaser:hover .hover-video .two > img:not(.hover-anim),
+.hover-video:hover .two > img:not(.hover-anim) {
   opacity: 0;
 }
 
