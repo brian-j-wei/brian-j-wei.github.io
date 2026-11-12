@@ -220,6 +220,61 @@ h2 {
   font-size: 32px;
 }
 
+/* News timeline: vertical line with a dot per item, newest first */
+.timeline {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.timeline li {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 0 0 16px 26px;
+  line-height: 20px;
+}
+
+.timeline li:last-child {
+  padding-bottom: 0;
+}
+
+/* connecting line: from this item's dot down to the next one */
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: -10px;
+  width: 2px;
+  background: #dcdfe4;
+}
+
+.timeline li:last-child::before {
+  display: none;
+}
+
+/* the dot */
+.timeline li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1772d0;
+  box-shadow: 0 0 0 3px #e3edf9;
+}
+
+.timeline-date {
+  flex: 0 0 auto;
+  min-width: 64px;
+  font-weight: 700;
+  color: #555;
+  white-space: nowrap;
+}
+
 /* Publication cards: one rounded box per row; white teaser cell | off-white text cell */
 #publications {
   --pub-card-border: #dcdfe4;
