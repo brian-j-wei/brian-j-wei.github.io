@@ -420,6 +420,8 @@ a.btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(23
 .story .line { display: block; }
 .story em { font-style: normal; color: var(--gold); }
 .story.is-center { text-align: center; }
+/* longer lines (Motivation): smaller, so each line stays on one line from tablet width up */
+.story.is-small { font-size: clamp(30px, 4.5vw, 52px); }
 
 .lead {
   max-width: 760px;
