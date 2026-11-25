@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>X Marks the Spot · DIG</title>
+  <meta name="description" content="X Marks the Spot: Diffusion for Image Geolocalization with Location Representations. DIG diffuses in the embedding space of pretrained location encoders and decodes to coordinates.">
+  <meta name="theme-color" content="#03060d">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="X Marks the Spot: Diffusion for Image Geolocalization with Location Representations">
+  <meta property="og:description" content="DIG predicts where a photo was taken by diffusing in the representation space of pretrained location encoders.">
+  <meta property="og:image" content="https://brian-j-wei.github.io/dig/static/images/teaser.webp">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="static/images/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../images/favicon/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="static/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="static/css/dig.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     SHARED LOGO GEOMETRY
+     intro.js reads these same paths to sample where the stars land,
+     so the star formation lines up exactly with the crisp DIG logo.
+══════════════════════════════════════════════════════ -->
+<svg class="svg-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="shovel">
+      <path d="M -28 -138 H 28 L 10 -101 H -10 Z" fill="none" stroke-width="18" stroke-linejoin="round"/>
+      <path d="M -14 -106 H 14 V 36 H -14 Z"/>
+      <path d="M -18 28 H 18 L 23 56 H -23 Z"/>
+      <path d="M -42 60 Q -42 51 -33 51 H 33 Q 42 51 42 60 V 98 Q 42 127 0 150 Q -42 127 -42 98 Z"/>
+    </g>
+    <!-- the I of DIG: the shovel with a shorter handle so it spans exactly cap height to baseline -->
+    <g id="shovel-i">
+      <path d="M -28 -118 H 28 L 10 -81 H -10 Z" fill="none" stroke-width="18" stroke-linejoin="round"/>
+      <path d="M -14 -86 H 14 V 16.5 H -14 Z"/>
+      <path d="M -18 8.5 H 18 L 23 36.5 H -23 Z"/>
+      <path d="M -42 40.5 Q -42 31.5 -33 31.5 H 33 Q 42 31.5 42 40.5 V 78.5 Q 42 107.5 0 130.5 Q -42 107.5 -42 78.5 Z"/>
+    </g>
+    <!-- DIG wordmark (viewBox -4 -4 266 112): geometric D and G (cap height 0 to 100), shovel as the I -->
+    <g id="dig-letters" fill="none" stroke-width="18" stroke-linejoin="miter">
+      <path d="M 9 9 H 36 A 41 41 0 0 1 36 91 H 9 Z"/>
+      <path d="M 240.5 24.7 A 40 41 0 1 0 249 50 H 217"/>
+    </g>
+    <g id="dig-wordmark">
+      <g class="ink-paper-stroke"><use href="#dig-letters"/></g>
+      <g transform="translate(123 50.8) scale(0.4)" class="ink-red"><use href="#shovel-i"/></g>
+    </g>
+    <!-- torn parchment edge for the figure cards: noise displaces the paper's outline by a few px -->
+    <filter id="paper-edge" x="-4%" y="-6%" width="108%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" seed="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <symbol id="i-paper" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m9 7-5 5 5 5m6-10 5 5-5 5"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path d="M6 7h4v4c0 3-1.4 5-4 6m8-10h4v4c0 3-1.4 5-4 6"/></symbol>
+  </defs>
+</svg>
+
+<!-- ══════════════════════════════════════════════════════
+     MAP KEY (ribbon): slides in once the title has formed and stays
+     at the top; the current section is highlighted by dig.js
+══════════════════════════════════════════════════════ -->
+<nav class="ribbon" aria-label="Map key">
+  <div class="ribbon-inner">
+    <a class="ribbon-brand" href="#title" aria-label="DIG: back to the title">
+      <svg viewBox="-4 -4 266 112" aria-hidden="true"><use href="#dig-wordmark"/></svg>
+    </a>
+    <ol class="ribbon-key">
+      <li><a href="#overview"><i class="swatch sw-sand" aria-hidden="true"></i>Overview</a></li>
+      <li><a href="#motivation"><i class="swatch sw-dirt" aria-hidden="true"></i>Motivation</a></li>
+      <li><a href="#method"><i class="swatch sw-gravel" aria-hidden="true"></i>Method</a></li>
+      <li><a href="#sampling"><i class="swatch sw-stone" aria-hidden="true"></i>Sampling</a></li>
+      <li><a href="#results"><i class="swatch sw-bedrock" aria-hidden="true"></i>Results</a></li>
+      <li><a href="#bibtex"><i class="swatch sw-treasure" aria-hidden="true"></i>BibTeX</a></li>
+    </ol>
+    <div class="ribbon-actions">
+      <a class="btn btn-sm" href="https://arxiv.org/abs/2611.13180">arXiv</a>
+      <a class="btn btn-sm" href="https://arxiv.org/pdf/2611.13180">PDF</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     LAYER SCALE (fixed, right edge): a tick per layer, the red X
+     marks where you are; dig.js positions the ticks
+══════════════════════════════════════════════════════ -->
+<aside class="gauge" aria-label="Page layers">
+  <span class="gauge-layer">Surface</span>
+  <div class="gauge-track">
+    <span class="gauge-fill"></span>
+    <span class="gauge-marker" aria-hidden="true"><svg viewBox="-48 -130 96 264"><use href="#shovel-i"/></svg></span>
+    <ol class="gauge-ticks"></ol>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     SURFACE: night sky. The section is tall and the stage sticks while you
+     scroll through it; intro.js maps that scroll to the animation
+     (stars → DIG wordmark → title), like the HiT page.
+══════════════════════════════════════════════════════ -->
+<header class="intro" id="top" data-layer="Surface" data-topic="Title" data-anchor="title">
+  <span class="intro-anchor" id="title" aria-hidden="true"></span>
+  <div class="stage">
+    <div class="moon" aria-hidden="true"></div>
+    <canvas class="stars" aria-hidden="true"></canvas>
+    <svg class="mark mark-dig" viewBox="-4 -4 266 112" aria-hidden="true"><use href="#dig-wordmark"/></svg>
+
+    <div class="identity">
+      <div class="title-row">
+        <span class="logo-slot" aria-hidden="true">
+          <svg viewBox="-4 -4 266 112"><use href="#dig-wordmark"/></svg>
+        </span>
+        <h1 class="title">
+          <span class="title-main">X Marks the Spot</span>
+          <span class="title-sub">Diffusion for Image Geolocalization with Location Representations</span>
+        </h1>
+      </div>
+      <p class="authors">
+        <a href="https://brian-j-wei.github.io/">Brian Wei</a>
+        <a href="https://leohsuprogramminglab.github.io/">Leo Hsu</a>
+        <a href="https://humblegamer.github.io/">Tianyi Gao</a>
+        <a href="https://dcher95.github.io/">Dan Cher</a>
+        <a href="https://ericx003.github.io/">Eric Xing</a>
+        <a href="https://danni-beaulieu.github.io/">Danni Beaulieu</a>
+        <a href="https://jacobsn.github.io/">Nathan Jacobs</a>
+      </p>
+      <p class="affil"><a href="https://mvrl.washu.edu/">MVRL</a> &middot; Washington University in St. Louis</p>
+      <div class="links">
+        <a class="btn" href="https://arxiv.org/abs/2611.13180"><svg aria-hidden="true"><use href="#i-paper"/></svg>arXiv</a>
+        <a class="btn" href="https://arxiv.org/pdf/2611.13180"><svg aria-hidden="true"><use href="#i-pdf"/></svg>PDF</a>
+        <span class="btn is-soon" aria-disabled="true" title="Code and models will be released"><svg aria-hidden="true"><use href="#i-code"/></svg>Code <small>soon</small></span>
+        <a class="btn" href="#bibtex"><svg aria-hidden="true"><use href="#i-quote"/></svg>BibTeX</a>
+      </div>
+    </div>
+
+    <!-- opening screen: big prompt in the middle; it fades as you scroll and the small cue returns at the end -->
+    <a class="dig-hint" href="#overview" aria-hidden="true" tabindex="-1">Scroll to dig deeper</a>
+
+    <a class="dig-cue" href="#overview">
+      <span class="dig-cue-text">Scroll to dig deeper</span>
+      <svg class="dig-cue-icon" viewBox="-60 -160 120 330" aria-hidden="true"><g class="ink-paper"><use href="#shovel"/></g></svg>
+    </a>
+
+    <div class="ground" aria-hidden="true">
+      <svg class="dunes" viewBox="0 0 1600 160" preserveAspectRatio="none">
+        <path class="dune dune-back" d="M0 78.2 L8 78.5 L16 78.6 L24 78.4 L32 78.0 L40 77.4 L48 76.6 L56 75.7 L64 74.8 L72 73.8 L80 72.9 L88 72.2 L96 71.6 L104 71.2 L112 70.9 L120 70.9 L128 71.0 L136 71.2 L144 71.6 L152 71.9 L160 72.3 L168 72.6 L176 72.9 L184 73.0 L192 73.0 L200 73.0 L208 72.8 L216 72.5 L224 72.2 L232 72.0 L240 71.8 L248 71.6 L256 71.7 L264 71.8 L272 72.2 L280 72.7 L288 73.3 L296 74.1 L304 74.9 L312 75.7 L320 76.4 L328 77.1 L336 77.6 L344 77.8 L352 77.9 L360 77.6 L368 77.1 L376 76.4 L384 75.4 L392 74.3 L400 73.0 L408 71.6 L416 70.3 L424 68.9 L432 67.6 L440 66.4 L448 65.4 L456 64.4 L464 63.5 L472 62.8 L480 62.1 L488 61.4 L496 60.6 L504 59.8 L512 58.9 L520 57.9 L528 56.8 L536 55.6 L544 54.2 L552 52.8 L560 51.4 L568 50.1 L576 48.8 L584 47.7 L592 46.8 L600 46.1 L608 45.7 L616 45.6 L624 45.7 L632 46.1 L640 46.7 L648 47.5 L656 48.4 L664 49.4 L672 50.4 L680 51.3 L688 52.1 L696 52.8 L704 53.3 L712 53.8 L720 54.0 L728 54.2 L736 54.3 L744 54.4 L752 54.5 L760 54.6 L768 54.8 L776 55.1 L784 55.6 L792 56.2 L800 56.8 L808 57.6 L816 58.3 L824 59.1 L832 59.7 L840 60.3 L848 60.7 L856 60.9 L864 60.9 L872 60.7 L880 60.4 L888 59.8 L896 59.1 L904 58.3 L912 57.6 L920 56.8 L928 56.2 L936 55.7 L944 55.4 L952 55.3 L960 55.4 L968 55.8 L976 56.4 L984 57.2 L992 58.1 L1000 59.0 L1008 60.1 L1016 61.1 L1024 62.0 L1032 62.9 L1040 63.7 L1048 64.4 L1056 65.0 L1064 65.5 L1072 66.1 L1080 66.6 L1088 67.1 L1096 67.8 L1104 68.6 L1112 69.5 L1120 70.5 L1128 71.8 L1136 73.2 L1144 74.6 L1152 76.2 L1160 77.7 L1168 79.2 L1176 80.6 L1184 81.8 L1192 82.8 L1200 83.5 L1208 84.0 L1216 84.2 L1224 84.1 L1232 83.8 L1240 83.2 L1248 82.5 L1256 81.7 L1264 80.9 L1272 80.0 L1280 79.2 L1288 78.4 L1296 77.8 L1304 77.2 L1312 76.8 L1320 76.4 L1328 76.1 L1336 75.7 L1344 75.4 L1352 74.9 L1360 74.4 L1368 73.7 L1376 72.9 L1384 71.9 L1392 70.8 L1400 69.6 L1408 68.4 L1416 67.1 L1424 65.9 L1432 64.8 L1440 63.9 L1448 63.2 L1456 62.7 L1464 62.4 L1472 62.4 L1480 62.5 L1488 62.9 L1496 63.4 L1504 64.0 L1512 64.7 L1520 65.3 L1528 65.8 L1536 66.2 L1544 66.5 L1552 66.5 L1560 66.4 L1568 66.1 L1576 65.7 L1584 65.1 L1592 64.5 L1600 63.8 V160 H0 Z"/><path class="crest crest-back" d="M0 78.2 L8 78.5 L16 78.6 L24 78.4 L32 78.0 L40 77.4 L48 76.6 L56 75.7 L64 74.8 L72 73.8 L80 72.9 L88 72.2 L96 71.6 L104 71.2 L112 70.9 L120 70.9 L128 71.0 L136 71.2 L144 71.6 L152 71.9 L160 72.3 L168 72.6 L176 72.9 L184 73.0 L192 73.0 L200 73.0 L208 72.8 L216 72.5 L224 72.2 L232 72.0 L240 71.8 L248 71.6 L256 71.7 L264 71.8 L272 72.2 L280 72.7 L288 73.3 L296 74.1 L304 74.9 L312 75.7 L320 76.4 L328 77.1 L336 77.6 L344 77.8 L352 77.9 L360 77.6 L368 77.1 L376 76.4 L384 75.4 L392 74.3 L400 73.0 L408 71.6 L416 70.3 L424 68.9 L432 67.6 L440 66.4 L448 65.4 L456 64.4 L464 63.5 L472 62.8 L480 62.1 L488 61.4 L496 60.6 L504 59.8 L512 58.9 L520 57.9 L528 56.8 L536 55.6 L544 54.2 L552 52.8 L560 51.4 L568 50.1 L576 48.8 L584 47.7 L592 46.8 L600 46.1 L608 45.7 L616 45.6 L624 45.7 L632 46.1 L640 46.7 L648 47.5 L656 48.4 L664 49.4 L672 50.4 L680 51.3 L688 52.1 L696 52.8 L704 53.3 L712 53.8 L720 54.0 L728 54.2 L736 54.3 L744 54.4 L752 54.5 L760 54.6 L768 54.8 L776 55.1 L784 55.6 L792 56.2 L800 56.8 L808 57.6 L816 58.3 L824 59.1 L832 59.7 L840 60.3 L848 60.7 L856 60.9 L864 60.9 L872 60.7 L880 60.4 L888 59.8 L896 59.1 L904 58.3 L912 57.6 L920 56.8 L928 56.2 L936 55.7 L944 55.4 L952 55.3 L960 55.4 L968 55.8 L976 56.4 L984 57.2 L992 58.1 L1000 59.0 L1008 60.1 L1016 61.1 L1024 62.0 L1032 62.9 L1040 63.7 L1048 64.4 L1056 65.0 L1064 65.5 L1072 66.1 L1080 66.6 L1088 67.1 L1096 67.8 L1104 68.6 L1112 69.5 L1120 70.5 L1128 71.8 L1136 73.2 L1144 74.6 L1152 76.2 L1160 77.7 L1168 79.2 L1176 80.6 L1184 81.8 L1192 82.8 L1200 83.5 L1208 84.0 L1216 84.2 L1224 84.1 L1232 83.8 L1240 83.2 L1248 82.5 L1256 81.7 L1264 80.9 L1272 80.0 L1280 79.2 L1288 78.4 L1296 77.8 L1304 77.2 L1312 76.8 L1320 76.4 L1328 76.1 L1336 75.7 L1344 75.4 L1352 74.9 L1360 74.4 L1368 73.7 L1376 72.9 L1384 71.9 L1392 70.8 L1400 69.6 L1408 68.4 L1416 67.1 L1424 65.9 L1432 64.8 L1440 63.9 L1448 63.2 L1456 62.7 L1464 62.4 L1472 62.4 L1480 62.5 L1488 62.9 L1496 63.4 L1504 64.0 L1512 64.7 L1520 65.3 L1528 65.8 L1536 66.2 L1544 66.5 L1552 66.5 L1560 66.4 L1568 66.1 L1576 65.7 L1584 65.1 L1592 64.5 L1600 63.8"/>
+        <path class="dune dune-front" d="M0 113.0 L8 112.7 L16 112.3 L24 111.9 L32 111.4 L40 110.8 L48 110.3 L56 109.7 L64 109.2 L72 108.7 L80 108.2 L88 107.8 L96 107.4 L104 107.0 L112 106.8 L120 106.5 L128 106.2 L136 106.0 L144 105.7 L152 105.4 L160 105.0 L168 104.6 L176 104.1 L184 103.5 L192 102.8 L200 102.1 L208 101.3 L216 100.4 L224 99.5 L232 98.5 L240 97.6 L248 96.7 L256 95.8 L264 95.0 L272 94.3 L280 93.7 L288 93.2 L296 92.8 L304 92.6 L312 92.5 L320 92.5 L328 92.6 L336 92.8 L344 93.1 L352 93.4 L360 93.7 L368 94.1 L376 94.4 L384 94.8 L392 95.0 L400 95.3 L408 95.4 L416 95.5 L424 95.6 L432 95.6 L440 95.6 L448 95.5 L456 95.5 L464 95.5 L472 95.5 L480 95.5 L488 95.7 L496 95.8 L504 96.1 L512 96.4 L520 96.8 L528 97.3 L536 97.8 L544 98.3 L552 98.8 L560 99.3 L568 99.8 L576 100.2 L584 100.6 L592 100.8 L600 101.0 L608 101.0 L616 101.0 L624 100.8 L632 100.5 L640 100.2 L648 99.7 L656 99.3 L664 98.7 L672 98.2 L680 97.8 L688 97.3 L696 96.9 L704 96.6 L712 96.4 L720 96.3 L728 96.2 L736 96.3 L744 96.4 L752 96.7 L760 97.0 L768 97.3 L776 97.6 L784 98.0 L792 98.4 L800 98.7 L808 99.0 L816 99.2 L824 99.5 L832 99.6 L840 99.7 L848 99.8 L856 99.9 L864 100.0 L872 100.1 L880 100.2 L888 100.4 L896 100.6 L904 101.0 L912 101.4 L920 101.9 L928 102.6 L936 103.3 L944 104.1 L952 105.0 L960 106.0 L968 107.0 L976 108.0 L984 109.0 L992 110.0 L1000 110.9 L1008 111.8 L1016 112.6 L1024 113.2 L1032 113.7 L1040 114.2 L1048 114.5 L1056 114.7 L1064 114.8 L1072 114.8 L1080 114.7 L1088 114.6 L1096 114.5 L1104 114.3 L1112 114.2 L1120 114.1 L1128 114.0 L1136 114.0 L1144 114.0 L1152 114.0 L1160 114.1 L1168 114.2 L1176 114.3 L1184 114.4 L1192 114.5 L1200 114.6 L1208 114.6 L1216 114.5 L1224 114.4 L1232 114.1 L1240 113.8 L1248 113.4 L1256 112.9 L1264 112.3 L1272 111.7 L1280 111.0 L1288 110.3 L1296 109.7 L1304 109.0 L1312 108.4 L1320 107.9 L1328 107.5 L1336 107.1 L1344 106.9 L1352 106.8 L1360 106.8 L1368 106.9 L1376 107.1 L1384 107.4 L1392 107.7 L1400 108.1 L1408 108.5 L1416 108.9 L1424 109.2 L1432 109.5 L1440 109.8 L1448 109.9 L1456 110.0 L1464 110.1 L1472 110.0 L1480 109.9 L1488 109.7 L1496 109.5 L1504 109.3 L1512 109.0 L1520 108.8 L1528 108.6 L1536 108.4 L1544 108.3 L1552 108.2 L1560 108.2 L1568 108.3 L1576 108.4 L1584 108.5 L1592 108.6 L1600 108.7 V160 H0 Z"/><path class="crest" d="M0 113.0 L8 112.7 L16 112.3 L24 111.9 L32 111.4 L40 110.8 L48 110.3 L56 109.7 L64 109.2 L72 108.7 L80 108.2 L88 107.8 L96 107.4 L104 107.0 L112 106.8 L120 106.5 L128 106.2 L136 106.0 L144 105.7 L152 105.4 L160 105.0 L168 104.6 L176 104.1 L184 103.5 L192 102.8 L200 102.1 L208 101.3 L216 100.4 L224 99.5 L232 98.5 L240 97.6 L248 96.7 L256 95.8 L264 95.0 L272 94.3 L280 93.7 L288 93.2 L296 92.8 L304 92.6 L312 92.5 L320 92.5 L328 92.6 L336 92.8 L344 93.1 L352 93.4 L360 93.7 L368 94.1 L376 94.4 L384 94.8 L392 95.0 L400 95.3 L408 95.4 L416 95.5 L424 95.6 L432 95.6 L440 95.6 L448 95.5 L456 95.5 L464 95.5 L472 95.5 L480 95.5 L488 95.7 L496 95.8 L504 96.1 L512 96.4 L520 96.8 L528 97.3 L536 97.8 L544 98.3 L552 98.8 L560 99.3 L568 99.8 L576 100.2 L584 100.6 L592 100.8 L600 101.0 L608 101.0 L616 101.0 L624 100.8 L632 100.5 L640 100.2 L648 99.7 L656 99.3 L664 98.7 L672 98.2 L680 97.8 L688 97.3 L696 96.9 L704 96.6 L712 96.4 L720 96.3 L728 96.2 L736 96.3 L744 96.4 L752 96.7 L760 97.0 L768 97.3 L776 97.6 L784 98.0 L792 98.4 L800 98.7 L808 99.0 L816 99.2 L824 99.5 L832 99.6 L840 99.7 L848 99.8 L856 99.9 L864 100.0 L872 100.1 L880 100.2 L888 100.4 L896 100.6 L904 101.0 L912 101.4 L920 101.9 L928 102.6 L936 103.3 L944 104.1 L952 105.0 L960 106.0 L968 107.0 L976 108.0 L984 109.0 L992 110.0 L1000 110.9 L1008 111.8 L1016 112.6 L1024 113.2 L1032 113.7 L1040 114.2 L1048 114.5 L1056 114.7 L1064 114.8 L1072 114.8 L1080 114.7 L1088 114.6 L1096 114.5 L1104 114.3 L1112 114.2 L1120 114.1 L1128 114.0 L1136 114.0 L1144 114.0 L1152 114.0 L1160 114.1 L1168 114.2 L1176 114.3 L1184 114.4 L1192 114.5 L1200 114.6 L1208 114.6 L1216 114.5 L1224 114.4 L1232 114.1 L1240 113.8 L1248 113.4 L1256 112.9 L1264 112.3 L1272 111.7 L1280 111.0 L1288 110.3 L1296 109.7 L1304 109.0 L1312 108.4 L1320 107.9 L1328 107.5 L1336 107.1 L1344 106.9 L1352 106.8 L1360 106.8 L1368 106.9 L1376 107.1 L1384 107.4 L1392 107.7 L1400 108.1 L1408 108.5 L1416 108.9 L1424 109.2 L1432 109.5 L1440 109.8 L1448 109.9 L1456 110.0 L1464 110.1 L1472 110.0 L1480 109.9 L1488 109.7 L1496 109.5 L1504 109.3 L1512 109.0 L1520 108.8 L1528 108.6 L1536 108.4 L1544 108.3 L1552 108.2 L1560 108.2 L1568 108.3 L1576 108.4 L1584 108.5 L1592 108.6 L1600 108.7"/>
+      </svg>
+      <svg class="x-spot" viewBox="-24 -24 48 48" preserveAspectRatio="none"><path d="M-15 -15 L15 15 M15 -15 L-15 15"/></svg>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════
+     01 SAND: overview (question, teaser, the game)
+══════════════════════════════════════════════════════ -->
+<section class="stratum sand" id="overview" data-layer="Sand" data-topic="Overview">
+  <div class="tex tex-bedding" aria-hidden="true"></div>
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="kicker" data-reveal><span class="kicker-n">01</span>Sand<span class="kicker-topic">Overview</span></p>
+    <h2 class="story" data-reveal>
+      <span class="line">Where in the world</span>
+      <span class="line">was this photo taken?</span>
+    </h2>
+    <p class="lead" data-reveal>
+      DIG answers by generating a <em>location representation</em> instead of a coordinate.
+      Conditioned on the image, a rectified flow carries Gaussian noise to the embedding of a
+      pretrained location encoder, and a learned decoder maps that embedding back to latitude and longitude.
+    </p>
+
+    <figure class="paper-card is-wide" data-reveal>
+      <video class="teaser-video" src="static/videos/teaser_flow.mp4" poster="static/images/teaser_poster.webp"
+             width="1000" height="394" muted loop playsinline preload="metadata"
+             aria-label="Animation: two query images are each mapped from noise to a location embedding, then decoded to an X on the globe"></video>
+    </figure>
+    <p class="caption" data-reveal>
+      Diffusion for Image Geolocalization (DIG) in the location representation space.
+      Conditioned on the image, a rectified flow transports noise to location embeddings, which a learned
+      decoder maps to coordinates on the globe.
+    </p>
+
+    <!-- the game: one OSV-5M photo at a time against DIG-XL (static/js/game.js) -->
+    <div class="game" data-game data-reveal>
+      <div class="game-head">
+        <div class="game-intro">
+          <p class="subhead">Your turn</p>
+          <h3 class="game-title">Can you beat DIG?</h3>
+          <p class="game-how">
+            Drop your X where you think this photo was taken, then lock it in.
+            There&rsquo;s no clock: look back and forth as long as you like.
+          </p>
+          <p class="game-pool">Each photo is one of 500 picked at random from the OSV-5M test set.</p>
+        </div>
+      </div>
+
+      <div class="game-board" data-state="loading">
+        <figure class="game-photo is-loading">
+          <div class="game-photo-bg" aria-hidden="true"></div>
+          <img class="game-img" alt="" decoding="async">
+          <div class="game-photo-tools">
+            <!-- shrinks the photo into the map's corner so the map fills the board, and back -->
+            <button class="game-tool game-shrink" type="button" aria-pressed="false" aria-label="Bigger map"
+                    title="Shrink the photo for a bigger map">
+              <svg class="ico-shrink" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><rect class="fill" x="5.5" y="12" width="7.5" height="5" rx="1"/><path d="M19 7l-4.5 4.5M14.5 8v3.5H18"/></svg>
+              <svg class="ico-grow" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-7 7"/><rect x="4" y="11" width="9" height="9" rx="1.5"/></svg>
+            </button>
+            <button class="game-tool game-enlarge" type="button" aria-label="Enlarge the photo" title="Enlarge the photo">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-6.5 6.5M10 20H4v-6M4 20l6.5-6.5"/></svg>
+            </button>
+          </div>
+        </figure>
+        <div class="game-mapwrap">
+          <div class="game-map" aria-label="Map for your guess" aria-describedby="game-map-keys"></div>
+          <span class="game-cross" aria-hidden="true"></span>
+          <p class="game-hint" aria-hidden="true">Click the map to drop your X</p>
+          <p class="game-wheel" aria-hidden="true"><span>Click the map, then scroll to zoom</span></p>
+          <p class="sr-only" id="game-map-keys">Arrow keys pan, plus and minus zoom, and Enter drops your X at the center of the map.</p>
+        </div>
+        <p class="game-loading" data-loading>Unrolling the map&hellip;</p>
+      </div>
+
+      <div class="game-foot">
+        <div class="game-status" aria-live="polite">
+          <p class="game-prompt" data-prompt>Drop your X on the map.</p>
+          <div class="game-result" hidden>
+            <p class="game-verdict" data-verdict></p>
+            <div class="game-scores">
+              <div class="score is-you">
+                <span class="score-who"><svg class="ico ico-x" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>You</span>
+                <span class="score-bar"><i data-you-bar></i></span>
+                <span class="score-pts"><b data-you-pts></b> pts</span>
+                <span class="score-km" data-you-km></span>
+              </div>
+              <div class="score is-dig">
+                <span class="score-who"><svg class="ico ico-dig" viewBox="-48 -130 96 264" aria-hidden="true"><use href="#shovel-i"/></svg>DIG-XL</span>
+                <span class="score-bar"><i data-dig-bar></i></span>
+                <span class="score-pts"><b data-dig-pts></b> pts</span>
+                <span class="score-km" data-dig-km></span>
+              </div>
+            </div>
+            <p class="game-place">
+              <svg class="ico ico-cam" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><rect x="7" y="3.5" width="6" height="3.5" rx="1"/><circle cx="10" cy="11.2" r="3"/></svg>
+              <span>Taken in <b data-place></b>. <span class="game-dots" data-dots></span></span>
+            </p>
+          </div>
+        </div>
+        <div class="game-actions">
+          <button class="btn game-skip" type="button">New photo</button>
+          <button class="btn btn-primary game-guess" type="button" disabled>Guess</button>
+          <button class="btn btn-primary game-next" type="button" hidden>Next photo</button>
+        </div>
+      </div>
+      <p class="game-nojs">The game needs JavaScript to run.</p>
+
+      <dialog class="game-lightbox" aria-label="Enlarged photo">
+        <img alt="">
+        <button class="game-lightbox-close" type="button" aria-label="Close">&times;</button>
+      </dialog>
+    </div>
+    <p class="caption game-credit" data-reveal>
+      Photos: <a href="https://osv5m.github.io/">OSV-5M</a> / Mapillary contributors,
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+      DIG&rsquo;s guesses for these photos were computed offline.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     02 DIRT: motivation
+══════════════════════════════════════════════════════ -->
+<section class="stratum dirt" id="motivation" data-layer="Dirt" data-topic="Motivation">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="kicker" data-reveal><span class="kicker-n">02</span>Dirt<span class="kicker-topic">Motivation</span></p>
+    <h2 class="story" data-reveal>
+      <span class="line">Coordinates know <em>where</em>.</span>
+      <span class="line">Location embeddings also know <em>what</em>.</span>
+    </h2>
+    <!-- prior work vs. the question: the same pipeline, drawn twice; only the space the model generates
+         in changes. The middle node of each row opens onto ICA maps of that space (paper, appendix). -->
+    <figure class="arch is-prior" data-reveal>
+      <figcaption class="arch-head">
+        <span class="arch-tag">Prior work</span>
+        <span class="arch-title">Learn to generate coordinates.</span>
+        <span class="arch-cite">e.g. RFM, LocDiff</span>
+      </figcaption>
+      <div class="pipe" role="img"
+           aria-label="Prior work: a diffusion model, conditioned on the photo, turns noise into coordinates, which are the predicted location.">
+        <span class="pipe-photo"><svg viewBox="0 0 30 40" aria-hidden="true"><rect class="ph-frame" x="1" y="1" width="28" height="20" rx="3.5"/><circle class="ph-sun" cx="21.5" cy="7.5" r="2.6"/><path class="ph-hill" d="M2 18.5 10.5 10l6 6 3.5-3.5 7.5 7"/><path class="ph-arrow" d="M15 25v8"/><path class="ph-head" d="M10.5 32h9L15 39.5z"/></svg></span>
+        <span class="pipe-noise"><svg class="vec" viewBox="0 0 14 31" aria-hidden="true"><rect class="n1" x="0" y="0" width="14" height="14" rx="2.5"/><rect class="n4" x="0" y="17" width="14" height="14" rx="2.5"/></svg></span>
+        <i class="pipe-arrow a1"></i>
+        <span class="pipe-model">Diffusion</span>
+        <i class="pipe-arrow a2"></i>
+        <span class="pipe-space"><svg class="vec is-coords" viewBox="0 0 14 31" aria-hidden="true"><rect x="0" y="0" width="14" height="14" rx="2.5"/><rect x="0" y="17" width="14" height="14" rx="2.5"/></svg></span>
+        <i class="pipe-arrow a3 is-long"></i>
+        <span class="pipe-out"><svg class="globe" viewBox="0 0 48 48" aria-hidden="true"><circle class="g-ball" cx="24" cy="24" r="21"/><path class="g-grid" d="M24 3a10 21 0 0 0 0 42a10 21 0 0 0 0-42M3 24h42M6.5 13.5h35M6.5 34.5h35"/><path class="g-x" d="M26 12.5l9 9M35 12.5l-9 9"/></svg></span>
+        <span class="pipe-label l-noise">noise</span>
+        <span class="pipe-label l-space">coordinates<small>or spherical harmonics</small></span>
+        <span class="pipe-label l-out">location</span>
+      </div>
+      <div class="arch-zoom" aria-hidden="true"></div>
+      <div class="paper-card arch-maps">
+        <img src="static/images/ica_sh.webp" width="2100" height="347" loading="lazy"
+             alt="World maps colored by the first three independent components of spherical harmonics with L = 10, 20 and 40: smooth blobs and bands along the parallels">
+      </div>
+      <p class="arch-note"><b>Position alone:</b> two places are similar only if they are nearby.</p>
+    </figure>
+
+    <figure class="arch is-ours" data-reveal>
+      <figcaption class="arch-head">
+        <span class="arch-tag">Our question</span>
+        <span class="arch-title">Can pretrained location representations be the <em>latent space</em>?</span>
+      </figcaption>
+      <div class="pipe" role="img"
+           aria-label="Our question: the same diffusion model turns noise into the embedding of a pretrained location encoder, and a decoder, still to be found, maps it back to the location.">
+        <span class="pipe-photo"><svg viewBox="0 0 30 40" aria-hidden="true"><rect class="ph-frame" x="1" y="1" width="28" height="20" rx="3.5"/><circle class="ph-sun" cx="21.5" cy="7.5" r="2.6"/><path class="ph-hill" d="M2 18.5 10.5 10l6 6 3.5-3.5 7.5 7"/><path class="ph-arrow" d="M15 25v8"/><path class="ph-head" d="M10.5 32h9L15 39.5z"/></svg></span>
+        <span class="pipe-noise"><svg class="vec" viewBox="0 0 14 99" aria-hidden="true"><rect class="n1" x="0" y="0" width="14" height="14" rx="2.5"/><rect class="n4" x="0" y="17" width="14" height="14" rx="2.5"/><rect class="n2" x="0" y="34" width="14" height="14" rx="2.5"/><rect class="n5" x="0" y="51" width="14" height="14" rx="2.5"/><rect class="n3" x="0" y="68" width="14" height="14" rx="2.5"/><rect class="n1" x="0" y="85" width="14" height="14" rx="2.5"/></svg></span>
+        <i class="pipe-arrow a1"></i>
+        <span class="pipe-model">Diffusion</span>
+        <i class="pipe-arrow a2"></i>
+        <span class="pipe-space"><svg class="vec is-embed" viewBox="0 0 14 99" aria-hidden="true"><rect class="e1" x="0" y="0" width="14" height="14" rx="2.5"/><rect class="e2" x="0" y="17" width="14" height="14" rx="2.5"/><rect class="e3" x="0" y="34" width="14" height="14" rx="2.5"/><rect class="e4" x="0" y="51" width="14" height="14" rx="2.5"/><rect class="e5" x="0" y="68" width="14" height="14" rx="2.5"/><rect class="e6" x="0" y="85" width="14" height="14" rx="2.5"/></svg></span>
+        <i class="pipe-arrow a3"></i>
+        <span class="pipe-dec">Decoder<b class="pipe-q">?</b></span>
+        <i class="pipe-arrow a4"></i>
+        <span class="pipe-out"><svg class="globe" viewBox="0 0 48 48" aria-hidden="true"><circle class="g-ball" cx="24" cy="24" r="21"/><path class="g-grid" d="M24 3a10 21 0 0 0 0 42a10 21 0 0 0 0-42M3 24h42M6.5 13.5h35M6.5 34.5h35"/><path class="g-x" d="M26 12.5l9 9M35 12.5l-9 9"/></svg></span>
+        <span class="pipe-label l-noise">noise</span>
+        <span class="pipe-label l-space">location embedding<small>pretrained encoder</small></span>
+        <span class="pipe-label l-out">location</span>
+      </div>
+      <div class="arch-zoom" aria-hidden="true"></div>
+      <div class="paper-card arch-maps">
+        <img src="static/images/ica_maps.webp" width="2100" height="346" loading="lazy"
+             alt="World maps colored by the first three independent components of SatCLIP, TTE and GeoCLIP location embeddings: regions that follow the landscape">
+      </div>
+      <p class="arch-note"><b>Aligned with imagery:</b> similar places look alike, even continents apart.</p>
+    </figure>
+    <p class="caption" data-reveal>
+      Each map colors land by the first three independent components (ICA) of that representation.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     03 GRAVEL: method
+══════════════════════════════════════════════════════ -->
+<section class="stratum gravel" id="method" data-layer="Gravel" data-topic="Method">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="kicker" data-reveal><span class="kicker-n">03</span>Gravel<span class="kicker-topic">Method</span></p>
+    <h2 class="story" data-reveal>
+      <span class="line">Diffuse in the embedding.</span>
+      <span class="line">Decode to the globe.</span>
+    </h2>
+    <figure class="paper-card is-wide" data-reveal>
+      <img src="static/images/method.webp" width="2200" height="681" loading="lazy"
+           alt="Method overview: (a) LAE pretraining, where a decoder learns to recover coordinates from a frozen location encoder; (b) DIG, a diffusion model conditioned on the image that generates location embeddings decoded by the frozen LAE decoder">
+    </figure>
+    <p class="caption" data-reveal>
+      <b>Overview.</b> (a) Location Autoencoder (LAE) pretraining: a decoder learns to recover coordinates
+      from the embeddings of a frozen location encoder. (b) DIG, conditioned on the image, generates
+      location embeddings, which the frozen LAE decoder maps back to coordinates.
+    </p>
+
+    <ol class="steps">
+      <li class="step" data-reveal>
+        <span class="step-n">1</span>
+        <h3>Location Autoencoder</h3>
+        <p>
+          A frozen location encoder is paired with a residual-MLP decoder trained to minimize great-circle
+          distance over land coordinates. For GeoCLIP's high-frequency features, Levenberg&ndash;Marquardt
+          steps through the differentiable encoder refine the decoded estimate.
+        </p>
+        <p class="step-stat"><b>67.91% &rarr; 99.10%</b> within 1&nbsp;km after one refinement step</p>
+      </li>
+      <li class="step" data-reveal>
+        <span class="step-n">2</span>
+        <h3>Diffusion in LAE space</h3>
+        <p>
+          DIG is a residual MLP with AdaLN, conditioned on concatenated StreetCLIP and DINOv3 features. It
+          is trained with rectified flow, predicting and regressing the clean embedding
+          (<i>x</i>-prediction, <i>x</i>-loss), with REPA aligning an intermediate block to the location
+          representation.
+        </p>
+      </li>
+      <li class="step" data-reveal>
+        <span class="step-n">3</span>
+        <h3>Sample &amp; decode</h3>
+        <p>
+          From Gaussian noise, 50 Euler steps with classifier-free guidance (<i>s</i>&nbsp;=&nbsp;3) produce a
+          location embedding. The LAE decoder turns it into latitude and longitude. No reference
+          gallery is needed.
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     04 STONE: sampling in LAE space (interactive)
+══════════════════════════════════════════════════════ -->
+<section class="stratum stone" id="sampling" data-layer="Stone" data-topic="Sampling">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="kicker" data-reveal><span class="kicker-n">04</span>Stone<span class="kicker-topic">Sampling</span></p>
+    <h2 class="story" data-reveal>
+      <span class="line">Watch a sample</span>
+      <span class="line">find its spot.</span>
+    </h2>
+    <p class="lead" data-reveal>
+      Drag <i>t</i> from noise to data. The heatmap is the cosine similarity between DIG&rsquo;s latent and
+      location embeddings across the globe. At <i>t</i>&nbsp;=&nbsp;1, the generated embedding retrieves real
+      photos taken near the predicted spot.
+    </p>
+
+    <div class="sampler" data-sampler data-active="chicago" data-reveal>
+      <div class="sampler-tabs" role="tablist" aria-label="Query image">
+        <button class="sampler-tab" type="button" role="tab" aria-selected="true" data-query="chicago">
+          <img src="static/images/sampling/chicago_query.webp" alt="" width="433" height="325">
+          <span>Chicago, USA</span>
+        </button>
+        <button class="sampler-tab" type="button" role="tab" aria-selected="false" data-query="quebec">
+          <img src="static/images/sampling/quebec_query.webp" alt="" width="432" height="324">
+          <span>Qu&eacute;bec, Canada</span>
+        </button>
+      </div>
+
+      <div class="sampler-query">
+        <p class="sampler-label">Query</p>
+        <figure data-q="chicago">
+          <img src="static/images/sampling/chicago_query.webp" width="433" height="325" alt="Query photo: the Cloud Gate sculpture in Chicago">
+          <figcaption>Chicago, USA</figcaption>
+        </figure>
+        <figure data-q="quebec">
+          <img src="static/images/sampling/quebec_query.webp" width="432" height="324" alt="Query photo: a forest track near Baie-Saint-Paul, Québec">
+          <figcaption>Qu&eacute;bec, Canada</figcaption>
+        </figure>
+        <p class="sampler-note" data-q="chicago">
+          Cloud Gate is highly localizable: the similarity map resolves to a sharp peak, and the generated
+          embeddings retrieve the sculpture itself or the Chicago skyline from within 0.4&nbsp;km.
+        </p>
+        <p class="sampler-note" data-q="quebec">
+          A forest track near Baie-Saint-Paul offers few cues, and its boreal forest also characterizes
+          southern Scandinavia. The map stays diffuse over both, and one trajectory commits to the wrong
+          continent, yet it retrieves a similar forest road. The error is semantically intuitive.
+        </p>
+      </div>
+
+      <div class="sampler-globe">
+        <p class="sampler-label">Sampling in LAE space</p>
+        <div class="globe-frames" data-q="chicago">
+          <img data-t="0" src="static/images/sampling/chicago_t000.webp" width="702" height="690" alt="">
+          <img data-t="0.25" src="static/images/sampling/chicago_t025.webp" width="702" height="690" alt="">
+          <img data-t="0.5" src="static/images/sampling/chicago_t050.webp" width="702" height="690" alt="">
+          <img data-t="0.75" src="static/images/sampling/chicago_t075.webp" width="702" height="690" alt="">
+          <img data-t="1" src="static/images/sampling/chicago_t100.webp" width="702" height="690" alt="Similarity map concentrating to a sharp peak at Chicago">
+        </div>
+        <div class="globe-frames" data-q="quebec">
+          <img data-t="0" src="static/images/sampling/quebec_t000.webp" width="455" height="331" alt="">
+          <img data-t="0.5" src="static/images/sampling/quebec_t050.webp" width="455" height="331" alt="">
+          <img data-t="1" src="static/images/sampling/quebec_t100.webp" width="455" height="331" alt="Similarity map with two diffuse peaks, in Québec and southern Scandinavia">
+        </div>
+        <div class="sampler-controls">
+          <button class="sampler-play" type="button" aria-label="Play sampling from t = 0 to 1">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+          </button>
+          <input class="sampler-range" type="range" min="0" max="1" step="0.01" value="1" aria-label="Diffusion time t">
+          <output class="sampler-t">t = 1.00</output>
+        </div>
+      </div>
+
+      <div class="sampler-out">
+        <p class="sampler-label">Retrieved with the generated embedding</p>
+        <ul class="retrieved" data-q="chicago">
+          <li><img src="static/images/sampling/chicago_r1.webp" width="435" height="325" alt="Retrieved: Cloud Gate up close" loading="lazy"><span>0.4 km</span></li>
+          <li><img src="static/images/sampling/chicago_r2.webp" width="327" height="472" alt="Retrieved: Chicago skyline in the rain" loading="lazy"><span>0.4 km</span></li>
+          <li><img src="static/images/sampling/chicago_r3.webp" width="487" height="325" alt="Retrieved: Cloud Gate with the skyline" loading="lazy"><span>0.4 km</span></li>
+        </ul>
+        <ul class="retrieved" data-q="quebec">
+          <li><img src="static/images/sampling/quebec_r1.webp" width="325" height="183" alt="Retrieved: rocky forest trail" loading="lazy"><span>43 km</span></li>
+          <li><img src="static/images/sampling/quebec_r2.webp" width="432" height="324" alt="Retrieved: hillside above a valley" loading="lazy"><span>55 km</span></li>
+          <li class="is-miss"><img src="static/images/sampling/quebec_r3.webp" width="432" height="324" alt="Retrieved: gravel road through conifers, on the wrong continent" loading="lazy"><span>5,363 km</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     05 BEDROCK: results
+══════════════════════════════════════════════════════ -->
+<section class="stratum bedrock" id="results" data-layer="Bedrock" data-topic="Results">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="kicker" data-reveal><span class="kicker-n">05</span>Bedrock<span class="kicker-topic">Results</span></p>
+    <h2 class="story" data-reveal>
+      <span class="line">A new state of the art for</span>
+      <span class="line">database-free geolocalization.</span>
+    </h2>
+
+    <div class="stats" data-reveal>
+      <div class="stat"><b>2&times;</b><span>city-level accuracy of prior generative methods on OSV-5M</span></div>
+      <div class="stat"><b>+32.1</b><span>points at 1&nbsp;km over RFM<sub>10M</sub> on YFCC4k</span></div>
+      <div class="stat"><b>&gt;4000</b><span>GeoScore on OSV-5M, where the best prior method scores 3963</span></div>
+      <div class="stat"><b>1st</b><span>generative model to outperform retrieval-based methods</span></div>
+    </div>
+
+    <div class="tabs" data-tabs data-reveal>
+      <div class="tab-list" role="tablist" aria-label="Benchmark">
+        <button class="tab" type="button" role="tab" id="tab-osv" aria-controls="panel-osv" aria-selected="true">OSV-5M</button>
+        <button class="tab" type="button" role="tab" id="tab-flickr" aria-controls="panel-flickr" aria-selected="false" tabindex="-1">Im2GPS3k &amp; YFCC4k</button>
+      </div>
+
+      <div class="tab-panel" id="panel-osv" role="tabpanel" aria-labelledby="tab-osv">
+        <div class="table-wrap">
+          <table class="results">
+            <thead>
+              <tr>
+                <th class="ta-left" rowspan="2">Method</th>
+                <th rowspan="2">GeoScore&nbsp;&uarr;</th>
+                <th rowspan="2">Dist. (km)&nbsp;&darr;</th>
+                <th colspan="3">Accuracy (%)&nbsp;&uarr;</th>
+              </tr>
+              <tr><th>Country</th><th>Region</th><th>City</th></tr>
+            </thead>
+            <tbody>
+              <tr class="group"><td colspan="6">Deterministic</td></tr>
+              <tr><td class="ta-left">SC 0-shot</td><td>2273</td><td>2854</td><td>38.4</td><td>20.8</td><td>14.8</td></tr>
+              <tr><td class="ta-left">Regression</td><td>3028</td><td>1481</td><td>56.5</td><td>16.3</td><td>0.7</td></tr>
+              <tr><td class="ta-left">ISNs</td><td>3331</td><td>2308</td><td>66.8</td><td>39.4</td><td>4.2</td></tr>
+              <tr><td class="ta-left">Hybrid</td><td>3361</td><td>1814</td><td>68.0</td><td>39.4</td><td>5.9</td></tr>
+              <tr><td class="ta-left">SC Retr.</td><td>3597</td><td>1386</td><td>73.4</td><td>45.8</td><td>19.9</td></tr>
+              <tr><td class="ta-left">HierLoc</td><td>3963</td><td>861</td><td>82.9</td><td>55.0</td><td class="second">23.3</td></tr>
+              <tr class="group"><td colspan="6">Generative</td></tr>
+              <tr><td class="ta-left">Uniform</td><td>131</td><td>10052</td><td>2.4</td><td>0.1</td><td>0.0</td></tr>
+              <tr><td class="ta-left">vMFMix</td><td>1746</td><td>5662</td><td>34.2</td><td>11.1</td><td>0.3</td></tr>
+              <tr><td class="ta-left">vMF</td><td>2776</td><td>2439</td><td>52.7</td><td>17.2</td><td>0.6</td></tr>
+              <tr><td class="ta-left">FM &#8477;<sup>3</sup></td><td>3688</td><td>1149</td><td>74.9</td><td>40.0</td><td>4.2</td></tr>
+              <tr><td class="ta-left">Diff &#8477;<sup>3</sup></td><td>3762</td><td>1123</td><td>75.9</td><td>40.9</td><td>3.6</td></tr>
+              <tr><td class="ta-left">RFM &#119982;<sub>2</sub></td><td>3767</td><td>1069</td><td>76.2</td><td>44.2</td><td>5.4</td></tr>
+              <tr><td class="ta-left">LocDiff</td><td>&ndash;</td><td>&ndash;</td><td>77.0</td><td>46.3</td><td>11.0</td></tr>
+              <!-- data-medoid: the value (and data-medoid-mark: best/second) when the switch shows the medoid of 16 guided samples -->
+              <tr class="group ours-head">
+                <td colspan="6">
+                  <span class="ours-head-in">DIG-XL (ours)
+                    <button class="switch" type="button" role="switch" aria-checked="false" data-medoid-switch>
+                      <span class="switch-track" aria-hidden="true"></span>Medoid of 16 guided samples
+                    </button>
+                  </span>
+                </td>
+              </tr>
+              <tr class="ours"><td class="ta-left">GeoCLIP</td><td data-medoid="4145">4095</td><td class="second" data-medoid="763" data-medoid-mark="best">851</td><td class="second" data-medoid="84.5" data-medoid-mark="best">83.4</td><td class="second" data-medoid="61.0" data-medoid-mark="second">60.1</td><td class="best" data-medoid="25.4" data-medoid-mark="best">24.6</td></tr>
+              <tr class="ours"><td class="ta-left">SatCLIP</td><td class="second" data-medoid="4148" data-medoid-mark="second">4125</td><td data-medoid="847">912</td><td class="second" data-medoid="83.9">83.4</td><td class="best" data-medoid="61.4" data-medoid-mark="best">61.0</td><td data-medoid="22.8">22.4</td></tr>
+              <tr class="ours"><td class="ta-left">TTE</td><td class="best" data-medoid="4155" data-medoid-mark="best">4129</td><td class="best" data-medoid="782" data-medoid-mark="second">849</td><td class="best" data-medoid="84.1" data-medoid-mark="second">83.5</td><td data-medoid="58.0">57.4</td><td data-medoid="18.7">18.4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Official OSV-5M training and test splits. Dist. is mean distance. <b>Bold</b> is best, <i>italics</i> second best. DIG-XL answers with one guided sample; the switch shows the medoid of 16 guided samples.</p>
+      </div>
+
+      <div class="tab-panel" id="panel-flickr" role="tabpanel" aria-labelledby="tab-flickr" hidden>
+        <div class="table-wrap">
+          <table class="results is-dense">
+            <thead>
+              <tr>
+                <th class="ta-left" rowspan="2">Method</th>
+                <th colspan="5">Im2GPS3k</th>
+                <th colspan="5" class="split">YFCC4k</th>
+              </tr>
+              <tr>
+                <th>1&nbsp;km</th><th>25&nbsp;km</th><th>200&nbsp;km</th><th>750&nbsp;km</th><th>2500&nbsp;km</th>
+                <th class="split">1&nbsp;km</th><th>25&nbsp;km</th><th>200&nbsp;km</th><th>750&nbsp;km</th><th>2500&nbsp;km</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="group"><td colspan="11">Deterministic</td></tr>
+              <tr><td class="ta-left">PlaNet</td><td>8.5</td><td>24.8</td><td>34.3</td><td>48.4</td><td>64.6</td><td class="split">5.6</td><td>14.3</td><td>22.2</td><td>36.4</td><td>55.8</td></tr>
+              <tr><td class="ta-left">CPlaNet</td><td>10.2</td><td>26.5</td><td>34.6</td><td>48.6</td><td>64.6</td><td class="split">7.9</td><td>14.8</td><td>21.9</td><td>36.4</td><td>55.5</td></tr>
+              <tr><td class="ta-left">Translocator</td><td>11.8</td><td>31.1</td><td>46.7</td><td>58.9</td><td>80.1</td><td class="split">8.4</td><td>18.6</td><td>27.0</td><td>41.1</td><td>60.4</td></tr>
+              <tr><td class="ta-left">GeoDecoder</td><td>12.8</td><td>33.5</td><td>45.9</td><td>61.0</td><td>76.1</td><td class="split">10.3</td><td>24.4</td><td>33.9</td><td>50.0</td><td>68.7</td></tr>
+              <tr><td class="ta-left">PIGEOTTO</td><td>11.3</td><td>36.7</td><td>53.8</td><td>72.4</td><td>85.3</td><td class="split">10.4</td><td>23.7</td><td>40.6</td><td>62.2</td><td>77.7</td></tr>
+              <tr><td class="ta-left">GeoCLIP</td><td>14.1</td><td>34.5</td><td>50.7</td><td>69.7</td><td>83.8</td><td class="split">9.6</td><td>19.3</td><td>32.6</td><td>55.0</td><td>74.7</td></tr>
+              <tr><td class="ta-left">HierLoc</td><td>11.3</td><td>43.8</td><td>58.4</td><td>74.1</td><td>85.1</td><td class="split">8.4</td><td>30.2</td><td>43.3</td><td>61.7</td><td>75.8</td></tr>
+              <tr><td class="ta-left">Img2Loc</td><td>17.1</td><td>45.1</td><td>57.9</td><td>72.9</td><td>84.7</td><td class="split">14.1</td><td>29.6</td><td>41.4</td><td>59.3</td><td>76.9</td></tr>
+              <tr><td class="ta-left">G3</td><td>16.7</td><td>40.9</td><td>55.6</td><td>71.2</td><td>84.7</td><td class="split">24.0</td><td>35.9</td><td>47.0</td><td>64.3</td><td>78.2</td></tr>
+              <tr><td class="ta-left">GeoRanker</td><td>18.8</td><td>45.1</td><td>61.5</td><td>76.3</td><td>89.3</td><td class="split">32.9</td><td>43.5</td><td>54.3</td><td>69.8</td><td>82.5</td></tr>
+              <tr class="group"><td colspan="11">Generative</td></tr>
+              <tr><td class="ta-left">vMFMix</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td class="split">&ndash;</td><td>0.4</td><td>8.8</td><td>20.9</td><td>41.0</td></tr>
+              <tr><td class="ta-left">vMF</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td class="split">&ndash;</td><td>4.8</td><td>15.0</td><td>30.9</td><td>53.4</td></tr>
+              <tr><td class="ta-left">Diff &#8477;<sup>3</sup></td><td>0.0<sup>&Dagger;</sup></td><td>16.2<sup>&Dagger;</sup></td><td>46.8<sup>&Dagger;</sup></td><td>63.1<sup>&Dagger;</sup></td><td>79.1<sup>&Dagger;</sup></td><td class="split">0.0<sup>&Dagger;</sup></td><td>11.1</td><td>37.7</td><td>54.7</td><td>71.9</td></tr>
+              <tr><td class="ta-left">FM &#8477;<sup>3</sup></td><td>2.1<sup>&Dagger;</sup></td><td>29.1<sup>&Dagger;</sup></td><td>43.8<sup>&Dagger;</sup></td><td>60.8<sup>&Dagger;</sup></td><td>78.6<sup>&Dagger;</sup></td><td class="split">2.0<sup>&Dagger;</sup></td><td>22.1</td><td>35.0</td><td>53.2</td><td>73.1</td></tr>
+              <tr><td class="ta-left">RFM &#119982;<sub>2</sub></td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td class="split">&ndash;</td><td>23.7</td><td>36.4</td><td>54.5</td><td>73.6</td></tr>
+              <tr><td class="ta-left">RFM<sub>10M</sub> &#119982;<sub>2</sub></td><td>8.2<sup>&Dagger;</sup></td><td>37.2<sup>&Dagger;</sup></td><td>51.3<sup>&Dagger;</sup></td><td>66.8<sup>&Dagger;</sup></td><td>81.7<sup>&Dagger;</sup></td><td class="split">9.8<sup>&Dagger;</sup></td><td>33.5</td><td>45.3</td><td>61.1</td><td>77.7</td></tr>
+              <tr><td class="ta-left">LocDiff</td><td>10.9</td><td>34.0</td><td>53.3</td><td>72.5</td><td>85.2</td><td class="split">&ndash;</td><td>33.3</td><td>46.7</td><td>65.2</td><td>79.9</td></tr>
+              <tr><td class="ta-left">LocDiff-H</td><td>15.3</td><td>36.5</td><td>56.4</td><td>75.2</td><td>87.4</td><td class="split">&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td></tr>
+              <tr class="group ours-head"><td colspan="11">DIG-XL (ours), trained on MP16-Pro</td></tr>
+              <tr class="ours"><td class="ta-left">TTE</td><td>3.9</td><td>34.5</td><td>56.3</td><td>73.0</td><td>85.5</td><td class="split">1.8</td><td>23.4</td><td>47.7</td><td>65.0</td><td>77.6</td></tr>
+              <tr class="ours"><td class="ta-left">SatCLIP</td><td>2.4</td><td>36.4</td><td>55.5</td><td>72.0</td><td>84.8</td><td class="split">1.7</td><td>26.2</td><td>47.7</td><td>64.3</td><td>78.9</td></tr>
+              <tr class="ours"><td class="ta-left">GeoCLIP</td><td>17.3</td><td>41.6</td><td>56.2</td><td>72.0</td><td>86.3</td><td class="split">17.5</td><td>31.6</td><td>45.0</td><td>63.4</td><td>78.8</td></tr>
+              <tr class="ours"><td class="ta-left">GeoCLIP + GeoRanker</td><td>20.1</td><td>47.6</td><td class="best">64.1</td><td class="best">78.1</td><td class="best">89.6</td><td class="split">34.0</td><td>45.5</td><td>56.8</td><td>71.9</td><td>83.8</td></tr>
+              <tr class="group ours-head"><td colspan="11">DIG-XL (ours), trained on YFCC-44M</td></tr>
+              <tr class="ours"><td class="ta-left">TTE</td><td>2.2</td><td>36.0</td><td>59.6</td><td>74.9</td><td>87.3</td><td class="split">0.9</td><td>30.1</td><td>55.3</td><td>70.8</td><td>82.7</td></tr>
+              <tr class="ours"><td class="ta-left">SatCLIP</td><td>3.4</td><td>39.3</td><td>60.3</td><td>75.4</td><td>87.4</td><td class="split">2.7</td><td>36.6</td><td>58.4</td><td>72.0</td><td>82.7</td></tr>
+              <tr class="ours"><td class="ta-left">GeoCLIP</td><td>20.2</td><td>45.4</td><td>58.4</td><td>73.6</td><td>86.8</td><td class="split">30.1</td><td>47.5</td><td>58.3</td><td>71.1</td><td>82.9</td></tr>
+              <tr class="ours"><td class="ta-left">GeoCLIP<sub>10M</sub></td><td class="best">21.9</td><td class="best">48.6</td><td>60.8</td><td>75.3</td><td>87.6</td><td class="split best">41.9</td><td class="best">59.7</td><td class="best">67.9</td><td class="best">77.1</td><td class="best">86.1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Accuracy (%) within distance thresholds; <b>bold</b> is best. <sub>10M</sub> denotes training for 10M steps; <sup>&Dagger;</sup> reimplementation with public weights.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     06 TREASURE: citation
+══════════════════════════════════════════════════════ -->
+<section class="stratum treasure" id="bibtex" data-layer="Treasure" data-topic="BibTeX">
+  <div class="tex" aria-hidden="true"></div>
+  <div class="wrap is-narrow">
+    <p class="kicker is-center" data-reveal><span class="kicker-n">06</span>Treasure<span class="kicker-topic">Citation</span></p>
+
+    <div class="chest" data-chest aria-hidden="true">
+      <div class="chest-glow"></div>
+      <div class="chest-rays"></div>
+      <svg viewBox="0 0 260 210">
+        <defs>
+          <clipPath id="lid-clip"><path d="M38 98 V74 Q38 34 130 34 Q222 34 222 74 V98 Z"/></clipPath>
+        </defs>
+        <g class="chest-inside">
+          <ellipse cx="130" cy="100" rx="90" ry="14" fill="#1c1007"/>
+          <ellipse cx="96" cy="95" rx="14" ry="6" fill="#f2c55a"/><ellipse cx="96" cy="93" rx="11" ry="4" fill="#ffe08a"/>
+          <ellipse cx="120" cy="91" rx="14" ry="6" fill="#e9b94f"/><ellipse cx="120" cy="89" rx="11" ry="4" fill="#ffd877"/>
+          <ellipse cx="146" cy="94" rx="14" ry="6" fill="#f2c55a"/><ellipse cx="146" cy="92" rx="11" ry="4" fill="#ffe08a"/>
+          <ellipse cx="170" cy="96" rx="13" ry="5.5" fill="#e9b94f"/><ellipse cx="170" cy="94" rx="10" ry="3.6" fill="#ffd877"/>
+          <path d="M131 76 l9 9 -9 12 -9 -12z" fill="#ea5a44"/><path d="M131 76 l9 9 h-18z" fill="#ff8d77"/>
+        </g>
+        <g class="chest-base">
+          <rect x="38" y="96" width="184" height="98" rx="9" fill="#6b4321"/>
+          <path d="M38 128 H222 M38 161 H222" stroke="#4d2e14" stroke-width="3"/>
+          <rect x="58" y="96" width="16" height="98" fill="#d9a441"/>
+          <rect x="186" y="96" width="16" height="98" fill="#d9a441"/>
+          <rect x="34" y="92" width="192" height="12" rx="4" fill="#e3b04b"/>
+          <rect x="34" y="184" width="192" height="12" rx="4" fill="#c8913a"/>
+          <rect x="110" y="102" width="40" height="44" rx="7" fill="#f0c25a"/>
+          <path d="M122 113 l16 16 M138 113 l-16 16" stroke="#ea5a44" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="chest-lid">
+          <path d="M38 98 V74 Q38 34 130 34 Q222 34 222 74 V98 Z" fill="#7a4d25"/>
+          <g clip-path="url(#lid-clip)">
+            <path d="M38 62 Q130 30 222 62" fill="none" stroke="#5a3519" stroke-width="3"/>
+            <rect x="58" y="20" width="16" height="80" fill="#d9a441"/>
+            <rect x="186" y="20" width="16" height="80" fill="#d9a441"/>
+          </g>
+          <rect x="34" y="88" width="192" height="12" rx="4" fill="#e3b04b"/>
+        </g>
+      </svg>
+      <span class="spark" style="--x:18%;--y:34%;--d:0s"></span>
+      <span class="spark" style="--x:80%;--y:28%;--d:.7s"></span>
+      <span class="spark" style="--x:30%;--y:10%;--d:1.3s"></span>
+      <span class="spark" style="--x:70%;--y:6%;--d:.35s"></span>
+    </div>
+
+    <h2 class="story is-center" data-reveal>Shiver me timbers!</h2>
+    <p class="lead is-center" data-reveal>You found the treasure! If you find DIG useful, please consider citing it:</p>
+
+    <div class="bibtex" data-reveal>
+      <button class="bibtex-copy" type="button">Copy</button>
+<pre id="bibtexContent">@article{wei2026dig,
+  title   = {X Marks the Spot: Diffusion for Image Geolocalization
+             with Location Representations},
+  author  = {Wei, Brian and Hsu, Chih-Chuan and Gao, Tianyi and Cher, Daniel
+             and Xing, Eric and Beaulieu, Danielle and Jacobs, Nathan},
+  journal = {arXiv preprint arXiv:2611.13180},
+  year    = {2026}
+}</pre>
+    </div>
+
+    <p class="ack is-inspired" data-reveal>
+      This work was heavily inspired by
+      <a href="https://arxiv.org/abs/2412.06781">PLONK</a> (Dufour et&nbsp;al., CVPR&nbsp;2025) and
+      <a href="https://arxiv.org/abs/2510.11690">RAE</a> (Zheng et&nbsp;al., ICLR&nbsp;2026).
+    </p>
+
+    <p class="ack" data-reveal>
+      This research used the TGI RAILs advanced compute and data resource, which is supported by the
+      National Science Foundation (award OAC-2232860) and the Taylor Geospatial Institute. This work is
+      also supported by the AI-ACCESS National Research Traineeship, funded by the National Science
+      Foundation (award DGE-2244165).
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <a href="#title" class="foot-up">Back to the surface &uarr;</a>
+  <span>Washington University in St. Louis &middot; <a href="https://mvrl.washu.edu/">MVRL</a></span>
+</footer>
+
+<script src="static/js/intro.js" defer></script>
+<script src="static/js/dig.js" defer></script>
+<script src="static/js/game.js" defer></script>
+</body>
+</html>

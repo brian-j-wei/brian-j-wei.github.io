@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-175 -175 350 350">
+  <defs>
+    <g id="s">
+      <path d="M -28 -138 H 28 L 10 -101 H -10 Z" fill="none" stroke-width="18" stroke-linejoin="round"/>
+      <path d="M -14 -106 H 14 V 36 H -14 Z"/>
+      <path d="M -18 28 H 18 L 23 56 H -23 Z"/>
+      <path d="M -42 60 Q -42 51 -33 51 H 33 Q 42 51 42 60 V 98 Q 42 127 0 150 Q -42 127 -42 98 Z"/>
+    </g>
+    <g id="g">
+      <path d="M -28 -138 H 28 L 10 -101 H -10 Z" fill="none" stroke-width="36" stroke-linejoin="round"/>
+      <path d="M -14 -106 H 14 V 36 H -14 Z" stroke-width="18" stroke-linejoin="round"/>
+      <path d="M -18 28 H 18 L 23 56 H -23 Z" stroke-width="18" stroke-linejoin="round"/>
+      <path d="M -42 60 Q -42 51 -33 51 H 33 Q 42 51 42 60 V 98 Q 42 127 0 150 Q -42 127 -42 98 Z" stroke-width="18" stroke-linejoin="round"/>
+    </g>
+    <mask id="m" maskUnits="userSpaceOnUse" x="-175" y="-175" width="350" height="350">
+      <rect x="-175" y="-175" width="350" height="350" fill="#fff"/>
+      <g transform="rotate(42) translate(0 25)" fill="#000" stroke="#000"><use href="#g"/></g>
+    </mask>
+  </defs>
+  <g mask="url(#m)"><g transform="rotate(-42) translate(0 25)" fill="#f3ead6" stroke="#f3ead6"><use href="#s"/></g></g>
+  <g transform="rotate(42) translate(0 25)" fill="#ea5a44" stroke="#ea5a44"><use href="#s"/></g>
+</svg>
