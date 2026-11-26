@@ -190,17 +190,26 @@
       decoder maps to coordinates on the globe.
     </p>
 
-    <!-- the game: one OSV-5M photo at a time against DIG-XL (static/js/game.js) -->
+    <!-- the game: five rounds of one OSV-5M photo each against DIG-XL, then a summary (static/js/game.js) -->
     <div class="game" data-game data-reveal>
       <div class="game-head">
         <div class="game-intro">
           <p class="subhead">Your turn</p>
           <h3 class="game-title">Can you beat DIG?</h3>
           <p class="game-how">
-            Drop your X where you think this photo was taken, then lock it in.
+            Five photos, one at a time. Drop your X where you think each was taken, then lock it in.
             There&rsquo;s no clock: look back and forth as long as you like.
           </p>
           <p class="game-pool">Each photo is one of 500 picked at random from the OSV-5M test set.</p>
+        </div>
+        <!-- the round you're on; each pip turns red when you win that round, cream when DIG-XL does -->
+        <div class="game-progress" hidden>
+          <p class="game-round" aria-live="polite">Round <b data-round>1</b> of <span data-rounds>5</span></p>
+          <ol class="game-pips" aria-hidden="true"></ol>
+          <p class="game-totals">
+            <span><svg class="ico ico-x" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg>You <b data-you-total>0</b></span>
+            <span><svg class="ico ico-dig" viewBox="-48 -130 96 264" aria-hidden="true"><use href="#shovel-i"/></svg>DIG-XL <b data-dig-total>0</b></span>
+          </p>
         </div>
       </div>
 
@@ -230,6 +239,49 @@
         <p class="game-loading" data-loading>Unrolling the map&hellip;</p>
       </div>
 
+      <!-- after the last round: your total, DIG-XL's on the same photos, and where yours lands among DIG-XL's games -->
+      <section class="game-summary" hidden aria-labelledby="game-sum-title">
+        <div class="sum-score">
+          <h4 class="subhead sum-label" id="game-sum-title" tabindex="-1">Final score</h4>
+          <p class="sum-hero"><b data-sum-you>0</b><span>/ 25,000</span></p>
+          <p class="sum-dig">
+            <svg class="ico ico-dig" viewBox="-48 -130 96 264" aria-hidden="true"><use href="#shovel-i"/></svg>
+            <span>DIG-XL scored <b data-sum-dig>0</b> on the same five photos.</span>
+          </p>
+          <p class="game-verdict" data-sum-verdict></p>
+        </div>
+        <figure class="sum-dist">
+          <figcaption>
+            <p class="sum-dist-title" data-sum-pct></p>
+            <p class="sum-dist-sub">Bars: DIG-XL&rsquo;s total in 10,000 random games of five photos from this set.</p>
+          </figcaption>
+          <div class="dist" data-dist tabindex="0" role="group"
+               aria-label="Chart of DIG-XL's totals in 10,000 random games. Use the left and right arrow keys to read each bar."></div>
+          <p class="dist-key" aria-hidden="true">
+            <span><i class="k-bar"></i>DIG-XL, 10,000 random games</span>
+            <span><i class="k-dig"></i>DIG-XL on your five photos</span>
+            <span><i class="k-you"></i>You</span>
+          </p>
+          <details class="dist-table">
+            <summary>Show the numbers</summary>
+            <table>
+              <thead><tr><th scope="col">DIG-XL&rsquo;s total</th><th scope="col">Share of games</th></tr></thead>
+              <tbody data-dist-rows></tbody>
+            </table>
+          </details>
+          <p class="sr-only" aria-live="polite" data-dist-live></p>
+        </figure>
+        <div class="sum-rounds-wrap">
+          <table class="sum-rounds">
+            <thead><tr><th scope="col">Round</th><th scope="col">Taken in</th><th scope="col" class="num">You</th><th scope="col" class="num">DIG-XL</th></tr></thead>
+            <tbody data-sum-rows></tbody>
+          </table>
+        </div>
+        <div class="sum-actions">
+          <button class="btn btn-primary game-again" type="button">Play again</button>
+        </div>
+      </section>
+
       <div class="game-foot">
         <div class="game-status" aria-live="polite">
           <p class="game-prompt" data-prompt>Drop your X on the map.</p>
@@ -256,9 +308,8 @@
           </div>
         </div>
         <div class="game-actions">
-          <button class="btn game-skip" type="button">New photo</button>
           <button class="btn btn-primary game-guess" type="button" disabled>Guess</button>
-          <button class="btn btn-primary game-next" type="button" hidden>Next photo</button>
+          <button class="btn btn-primary game-next" type="button" hidden>Next round</button>
         </div>
       </div>
       <p class="game-nojs">The game needs JavaScript to run.</p>

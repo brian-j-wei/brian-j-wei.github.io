@@ -783,6 +783,114 @@ button.btn-primary:hover:not(:disabled) { border-color: #f27560; background: #f2
 .ico-cam { margin-top: 1px; fill: var(--gold); }
 .ico-cam circle { fill: #17120c; stroke: var(--gold); stroke-width: 1.4; }
 
+/* five rounds: the round you're on, who won each one so far, and the running totals */
+.game { scroll-margin-top: 72px; }
+.game-progress { display: grid; justify-items: end; gap: 9px; margin-left: auto; text-align: right; }
+.game-round { margin: 0; font: 500 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
+.game-round b { font-weight: 600; color: var(--ink); }
+.game-pips { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.game-pips li { width: 26px; height: 6px; border-radius: 999px; background: rgba(242, 235, 220, .12); transition: background-color .3s, box-shadow .3s; }
+.game-pips li.is-now { background: transparent; box-shadow: inset 0 0 0 1.5px var(--gold); }
+.game-pips li.is-you { background: var(--red); }
+.game-pips li.is-dig { background: var(--ink); }
+.game-pips li.is-tie { background: linear-gradient(90deg, var(--red) 50%, var(--ink) 50%); }
+.game-totals { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; margin: 0; font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.game-totals span { display: inline-flex; align-items: center; gap: 7px; }
+.game-totals b { font-weight: 650; color: var(--ink); }
+.game-totals .ico { width: 15px; height: 15px; }
+.game.is-over .game-progress { display: none; }
+
+/* after the last round: the summary takes the board's place */
+.game.is-over .game-board,
+.game.is-over .game-foot { display: none; }
+.game-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-areas: "score dist" "rounds dist" "again dist";
+  grid-template-rows: auto auto 1fr;
+  column-gap: clamp(28px, 4vw, 52px);
+  margin: 4px 6px 6px;
+  animation: sum-in .5s cubic-bezier(.2, .7, .2, 1) both;
+}
+@keyframes sum-in { from { opacity: 0; transform: translateY(10px); } }
+.sum-score { grid-area: score; }
+.sum-label { margin-bottom: 10px; }
+.sum-label:focus { outline: none; }
+.sum-hero { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; }
+.sum-hero b { font-size: clamp(48px, 5.4vw, 66px); font-weight: 680; line-height: 1; letter-spacing: -.035em; color: var(--ink); }
+.sum-hero span { font-size: 17px; color: var(--ink-3); }
+.sum-dig { display: flex; align-items: center; gap: 9px; margin: 14px 0 0; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+.sum-dig b { font-weight: 650; color: var(--ink); }
+.game-summary .game-verdict { margin: 12px 0 0; }
+
+.sum-rounds-wrap { grid-area: rounds; margin-top: 26px; overflow-x: auto; }
+.sum-rounds { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.sum-rounds thead th { padding: 0 0 8px; font: 500 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); text-align: left; }
+.sum-rounds tbody th { font-weight: 600; color: var(--ink-3); text-align: left; }
+.sum-rounds tbody :is(th, td) { padding-block: 7px; border-top: 1px solid var(--line); vertical-align: middle; }
+.sum-rounds :is(th, td) + :is(th, td) { padding-left: 14px; }
+.sum-rounds .num { text-align: right; white-space: nowrap; color: var(--ink-3); }
+.sum-rounds td.is-best { font-weight: 650; color: var(--ink); }
+.sum-place { display: flex; align-items: center; gap: 11px; line-height: 1.3; color: var(--ink-2); }
+.sum-place > span { min-width: 0; overflow-wrap: anywhere; }   /* long place names wrap instead of widening the table */
+.sum-thumb { flex: 0 0 auto; width: 52px; height: 34px; border-radius: 6px; object-fit: cover; background: #0c0a08; }
+.sum-actions { grid-area: again; margin-top: 22px; }
+
+.sum-dist { grid-area: dist; min-width: 0; margin: 0; }
+.sum-dist-title { margin: 0; font-size: clamp(19px, 1.75vw, 23px); font-weight: 640; line-height: 1.25; letter-spacing: -.015em; color: var(--ink); }
+.sum-dist-sub { margin: 6px 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
+.dist { position: relative; border-radius: 8px; }
+.dist:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
+.dist svg { display: block; overflow: visible; }
+.dist text { font-family: var(--font); }
+.d-grid { stroke: var(--line); stroke-width: 1; }
+.d-axis { stroke: var(--line-2); stroke-width: 1; }
+.d-tick { fill: var(--ink-3); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.d-bar { fill: #6b6458; transition: fill .15s; }                  /* DIG-XL's games: quiet context */
+.d-bar.is-on { fill: #958c7d; }
+.d-hit { fill: transparent; cursor: crosshair; }
+.d-mark line { stroke-width: 2; stroke-linecap: round; }
+.d-mark circle { stroke: #1d170f; stroke-width: 4; paint-order: stroke; }   /* a 2px ring in the card's color */
+.d-mark.is-you line { stroke: var(--red); }
+.d-mark.is-you circle { fill: var(--red); }
+.d-mark.is-dig line { stroke: var(--ink); }
+.d-mark.is-dig circle { fill: var(--ink); }
+.d-mark text { fill: var(--ink); font-size: 12.5px; }
+.d-who { font-weight: 650; }
+.d-val { fill: var(--ink-2); font-weight: 500; font-variant-numeric: tabular-nums; }
+.dist svg.is-new .d-bar { transform-box: fill-box; transform-origin: 50% 100%; animation: d-grow .7s cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--i) * 16ms + .15s); }
+.dist svg.is-new .d-mark { animation: d-fade .45s .75s both; }
+.dist svg.is-new .d-mark.is-you { animation-delay: 1s; }
+@keyframes d-grow { from { transform: scaleY(0); } }
+@keyframes d-fade { from { opacity: 0; } }
+.dist-tip {
+  position: absolute;
+  z-index: 2;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #0f0c08;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+  color: var(--ink-2);
+  font: 500 12.5px/1.3 var(--font);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+.dist-tip b { font-weight: 700; color: var(--ink); }
+.dist-key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.dist-key span { display: inline-flex; align-items: center; gap: 7px; }
+.dist-key i { display: inline-block; width: 14px; height: 2px; border-radius: 2px; }
+.dist-key .k-bar { width: 9px; height: 11px; border-radius: 2px 2px 0 0; background: #6b6458; }
+.dist-key .k-dig { background: var(--ink); }
+.dist-key .k-you { background: var(--red); }
+.dist-table { margin-top: 12px; font-size: 13px; color: var(--ink-3); }
+.dist-table summary { width: max-content; cursor: pointer; }
+.dist-table summary:hover { color: var(--ink-2); }
+.dist-table table { margin-top: 8px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.dist-table :is(th, td) { padding: 3px 22px 3px 0; font-weight: 400; text-align: left; }
+.dist-table thead th { font-weight: 600; color: var(--ink-2); }
+.dist-table td { text-align: right; }
+
 .game-nojs { display: none; }
 html:not(.js) .game-nojs { display: block; margin: 0; padding: 24px; text-align: center; }
 html:not(.js) .game-board,
@@ -1643,6 +1751,8 @@ html:not(.js) .game-foot { display: none; }
   .game-board.is-bigmap { height: auto; }
   .game-board.is-bigmap .game-mapwrap { height: min(76svh, 620px); }
   .game-board.is-bigmap .game-photo { left: auto; right: 10px; top: 10px; bottom: auto; width: clamp(128px, 40%, 240px); }
+  .game-summary { grid-template-columns: minmax(0, 1fr); grid-template-areas: "score" "dist" "rounds" "again"; grid-template-rows: none; }
+  .sum-dist { margin-top: 28px; }
 }
 @media (max-width: 760px) {
   body { font-size: 16px; }
@@ -1651,6 +1761,12 @@ html:not(.js) .game-foot { display: none; }
   .game-foot { margin-inline: 4px; }
   .game-actions { width: 100%; }
   .game-actions .btn { flex: 1; justify-content: center; }
+  .game-progress { justify-items: start; margin-left: 0; text-align: left; }
+  .game-totals { justify-content: flex-start; }
+  .sum-actions .btn { width: 100%; justify-content: center; }
+  .sum-thumb { width: 44px; height: 30px; }
+  .sum-place { gap: 9px; }
+  .sum-rounds :is(th, td) + :is(th, td) { padding-left: 10px; }
   .score { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "who pts km" "bar bar bar"; gap: 6px 14px; }
   .title-row { flex-direction: column; gap: 14px; }
   .title { text-align: center; }

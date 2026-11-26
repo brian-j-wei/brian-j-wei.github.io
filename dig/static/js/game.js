@@ -1,6 +1,8 @@
 /* ════════════════════════════════════════════════════════════
    DIG project page: "Can you beat DIG?"
-   One photo at a time: drop your X on the map, lock it in, and see how DIG-XL did.
+   Five rounds of one photo each: drop your X on the map, lock it in, and see how DIG-XL did.
+   After the fifth, a summary shows your total next to DIG-XL's, and where it lands among
+   DIG-XL's totals in 10,000 simulated games (no scores are stored or sent anywhere).
    Data: static/game/game500.json, 500 random OSV-5M test photos with DIG-XL's
    precomputed guesses (no model runs in the browser). Leaflet (vendored) and the
    data load only when the game comes near the viewport. Map tiles: OpenStreetMap.
@@ -44,6 +46,9 @@
     dots: 'The faint dots are 100 more samples from DIG: a picture of how sure it was.',
   };
   const LAYOUT_KEY = 'dig-game-bigmap';            // remembers "Bigger map" for this browser
+  const ROUNDS = 5;                                 // photos per game, 5,000 points each
+  const SIM_GAMES = 10000;                          // DIG-XL's simulated games for the summary's chart
+  const BIN = 1000, NBINS = ROUNDS * 5000 / BIN;   // the chart's bars: 1,000 points each
 
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = matchMedia('(hover: none) and (pointer: coarse)').matches;   // phones and tablets
@@ -102,7 +107,7 @@
   const board = $('.game-board'), fig = $('.game-photo'), img = $('.game-img'), photoBg = $('.game-photo-bg');
   const mapWrap = $('.game-mapwrap'), mapEl = $('.game-map'), hint = $('.game-hint'), wheelHint = $('.game-wheel');
   const loading = $('[data-loading]'), promptEl = $('[data-prompt]'), result = $('.game-result');
-  const guessBtn = $('.game-guess'), skipBtn = $('.game-skip'), nextBtn = $('.game-next');
+  const guessBtn = $('.game-guess'), nextBtn = $('.game-next');
   const shrinkBtn = $('.game-shrink');
   const out = {
     verdict: $('[data-verdict]'), place: $('[data-place]'), dots: $('[data-dots]'),
@@ -110,6 +115,15 @@
     digPts: $('[data-dig-pts]'), digKm: $('[data-dig-km]'), digBar: $('[data-dig-bar]'),
   };
   const box = $('.game-lightbox'), boxImg = box && box.querySelector('img');
+  const prog = {
+    box: $('.game-progress'), round: $('[data-round]'), list: $('.game-pips'), pips: [],
+    you: $('[data-you-total]'), dig: $('[data-dig-total]'),
+  };
+  const sum = {
+    box: $('.game-summary'), label: $('.sum-label'), you: $('[data-sum-you]'), dig: $('[data-sum-dig]'),
+    verdict: $('[data-sum-verdict]'), rows: $('[data-sum-rows]'), pct: $('[data-sum-pct]'),
+    dist: $('[data-dist]'), distRows: $('[data-dist-rows]'), live: $('[data-dist-live]'), again: $('.game-again'),
+  };
 
   const PROMPT_START = coarse ? 'Tap the map to drop your X.' : 'Drop your X on the map.';
   const PROMPT_PLACED = 'Move it as often as you like, then lock in your guess.';
@@ -119,6 +133,7 @@
   let photos = [], order = [], pos = -1, cur = null;
   let map = null, layer = null, icons = null, dot = null, youMarker = null;
   let guess = null, you = null, revealed = false;
+  let round = 0, results = [];                     // this game: { p, you, dig } per finished round
 
   // ── bigger map: the photo shrinks into the map's corner, the map takes the whole board ──
   let bigMap = false;
@@ -252,9 +267,20 @@
     hint.classList.add('is-off');
   }
 
-  // ── a round ──
-  function next() {
+  // ── a game of ROUNDS rounds ──
+  // Photos come from one shuffled deck, so a new game carries on through it: no repeats until all are seen.
+  function newGame() {
+    results = [];
+    round = 0;
+    root.classList.remove('is-over');
+    sum.box.hidden = true;
+    if (map) map.invalidateSize();                  // the map was hidden behind the summary
+    nextRound();
+  }
+
+  function nextRound() {
     if (!photos.length) return;
+    round++;
     pos++;
     if (pos >= order.length) {                       // seen them all: reshuffle, without an immediate repeat
       const last = order[order.length - 1];
@@ -275,13 +301,27 @@
     result.hidden = true;
     guessBtn.disabled = true;
     guessBtn.hidden = false;
-    skipBtn.hidden = false;
     nextBtn.hidden = true;
     hint.classList.remove('is-off');
+    renderProgress();
     worldView();
     showPhoto(cur);
-    const after = photos[order[(pos + 1) % order.length]];   // warm the cache for the next round
-    if (after) new Image().src = DATA_DIR + after.image;
+    if (round < ROUNDS) {                            // warm the cache for the next round
+      const after = photos[order[(pos + 1) % order.length]];
+      if (after) new Image().src = DATA_DIR + after.image;
+    }
+  }
+
+  const total = key => results.reduce((s, r) => s + (key === 'you' ? r.you.pts : r.dig.geoscore), 0);
+  const winner = r => (r.you.pts > r.dig.geoscore ? 'you' : r.you.pts < r.dig.geoscore ? 'dig' : 'tie');
+
+  function renderProgress() {
+    prog.round.textContent = String(round);
+    prog.pips.forEach((li, i) => {
+      li.className = results[i] ? `is-${winner(results[i])}` : i === round - 1 ? 'is-now' : '';
+    });
+    prog.you.textContent = nf.format(total('you'));
+    prog.dig.textContent = nf.format(total('dig'));
   }
 
   function showPhoto(p) {
@@ -304,6 +344,7 @@
     const g = guess.wrap();
     const d = km(cur.truth.lat, cur.truth.lon, g.lat, g.lng);
     you = { lat: g.lat, lon: g.lng, km: d, pts: geoscore(d) };
+    results.push({ p: cur, you, dig: cur[OPP.field] });
     youMarker.dragging.disable();
     root.classList.add('is-revealed');
     promptEl.hidden = true;
@@ -312,10 +353,11 @@
     out.digBar.style.setProperty('--w', 0);
     void result.offsetWidth;
     guessBtn.hidden = true;
-    skipBtn.hidden = true;
+    nextBtn.textContent = round < ROUNDS ? 'Next round' : 'See results';
     nextBtn.hidden = false;
     drawReveal();
     showResult();
+    renderProgress();
     nextBtn.focus({ preventScroll: true });
   }
 
@@ -367,12 +409,261 @@
   }
 
   guessBtn.addEventListener('click', reveal);
-  skipBtn.addEventListener('click', next);
   nextBtn.addEventListener('click', () => {
+    if (round >= ROUNDS) { showSummary(); return; }
     const keyboard = nextBtn.matches(':focus-visible');
-    next();
+    nextRound();
     if (keyboard) mapEl.focus({ preventScroll: true });   // keep keyboard players on the map
   });
+
+  // ── after the last round: the summary ──
+  const shortPlace = t => {
+    const parts = [t.city || t.region, countryName(t.country)].filter(Boolean);
+    return parts.filter((p, i) => parts.indexOf(p) === i).join(', ');
+  };
+
+  function showSummary() {
+    if (!digTotals) simulate();
+    const yt = total('you'), dt = total('dig'), diff = yt - dt;
+    sum.you.textContent = nf.format(yt);
+    sum.dig.textContent = nf.format(dt);
+    sum.verdict.className = `game-verdict ${diff > 0 ? 'is-win' : diff < 0 ? 'is-loss' : 'is-tie'}`;
+    sum.verdict.textContent = diff > 0 ? `You beat ${OPP.name} by ${nf.format(diff)} points!`
+      : diff < 0 ? `${OPP.name} wins by ${nf.format(-diff)} points.`
+        : `A dead heat at ${nf.format(yt)} points.`;
+    sum.pct.textContent = pctLine(below(yt) / SIM_GAMES);
+    sum.rows.replaceChildren(...results.map((r, i) => {
+      const tr = document.createElement('tr');
+      const n = document.createElement('th');
+      n.scope = 'row';
+      n.textContent = String(i + 1);
+      const where = document.createElement('td');
+      const wrap = document.createElement('span');
+      wrap.className = 'sum-place';
+      const thumb = new Image(52, 34);
+      thumb.className = 'sum-thumb';
+      thumb.alt = '';
+      thumb.decoding = 'async';
+      thumb.src = DATA_DIR + r.p.image;
+      const name = document.createElement('span');
+      name.textContent = shortPlace(r.p.truth);
+      wrap.append(thumb, name);
+      where.append(wrap);
+      const cell = (pts, d, best) => {
+        const td = document.createElement('td');
+        td.className = best ? 'num is-best' : 'num';
+        td.textContent = nf.format(pts);
+        td.title = `${fmtKm(d)} away`;
+        return td;
+      };
+      const w = winner(r);
+      tr.append(n, where, cell(r.you.pts, r.you.km, w === 'you'), cell(r.dig.geoscore, r.dig.km, w === 'dig'));
+      return tr;
+    }));
+    distData = { you: yt, dig: dt };
+    root.classList.add('is-over');
+    sum.box.hidden = false;
+    drawDist(true);
+    if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    sum.label.focus({ preventScroll: true });
+  }
+
+  sum.again.addEventListener('click', () => {
+    const keyboard = sum.again.matches(':focus-visible');
+    newGame();
+    if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    if (keyboard) mapEl.focus({ preventScroll: true });
+  });
+
+  // ── DIG-XL's games, for the summary's chart ──
+  // DIG-XL "plays" SIM_GAMES games of five different photos drawn at random from this set, each scored with
+  // its single guided guess (the answers you play against). A fixed seed keeps the curve, and so where a
+  // total lands on it, the same for every visitor.
+  let digTotals = null, digCounts = null;
+  function simulate() {
+    const s = photos.map(p => p[OPP.field].geoscore), n = s.length, idx = s.map((_, i) => i);
+    let seed = 20261126;
+    const rand = () => {                             // mulberry32
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), seed | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    digTotals = new Int32Array(SIM_GAMES);
+    for (let g = 0; g < SIM_GAMES; g++) {
+      let acc = 0;
+      for (let k = 0; k < ROUNDS; k++) {             // a partial shuffle draws five different photos
+        const j = k + Math.floor(rand() * (n - k));
+        const t = idx[k]; idx[k] = idx[j]; idx[j] = t;
+        acc += s[idx[k]];
+      }
+      digTotals[g] = acc;
+    }
+    digTotals.sort();
+    digCounts = new Array(NBINS).fill(0);
+    digTotals.forEach(t => { digCounts[Math.min(NBINS - 1, Math.floor(t / BIN))] += 1; });
+    sum.distRows.replaceChildren(...digCounts.flatMap((c, i) => {   // the chart as a table
+      if (!c) return [];
+      const tr = document.createElement('tr'), th = document.createElement('th'), td = document.createElement('td');
+      th.scope = 'row';
+      th.textContent = binRange(i);
+      td.textContent = sharePct(c);
+      tr.append(th, td);
+      return [tr];
+    }));
+  }
+  const binRange = i => `${nf.format(i * BIN)}–${nf.format(i === NBINS - 1 ? NBINS * BIN : i * BIN + BIN - 1)}`;
+  const sharePct = c => `${(c / SIM_GAMES * 100).toFixed(1)}%`;
+  const below = v => {                               // how many of DIG-XL's totals are lower than v
+    let lo = 0, hi = digTotals.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (digTotals[m] < v) lo = m + 1; else hi = m; }
+    return lo;
+  };
+  const pctLine = share => {
+    const p = share * 100, name = OPP.name, games = nf.format(SIM_GAMES);
+    if (p === 0) return `You’d beat ${name} in none of its ${games} games.`;
+    if (p === 100) return `You’d beat ${name} in all ${games} of its games!`;
+    if (p < 1) return `You’d beat ${name} in fewer than 1% of games.`;
+    if (p > 99) return `You’d beat ${name} in more than 99% of games!`;
+    return `You’d beat ${name} in ${Math.round(p)}% of games${p >= 50 ? '!' : '.'}`;
+  };
+
+  // ── the chart: DIG-XL's totals as bars; your total and DIG-XL's on your photos as lines ──
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const svgEl = (name, attrs, parent) => {
+    const e = document.createElementNS(SVGNS, name);
+    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    if (parent) parent.append(e);
+    return e;
+  };
+  const tip = document.createElement('div');
+  const tipVal = document.createElement('b'), tipText = document.createElement('span');
+  tip.className = 'dist-tip';
+  tip.hidden = true;
+  tip.append(tipVal, tipText);
+  let distData = null, view = null, active = -1;
+
+  function drawDist(animate) {
+    const W = Math.floor(sum.dist.clientWidth);
+    if (!W || !distData || !digCounts) return;
+    const H = 226, top = 62, base = 194, left = 38, right = 10, MAX = NBINS * BIN;
+    const pw = W - left - right, slot = pw / NBINS;
+    const share = digCounts.map(c => c / SIM_GAMES);
+    const yMax = Math.max(1, Math.ceil(Math.max(...share) * 20)) / 20;     // the next 5% up
+    const X = v => left + Math.max(0, Math.min(MAX, v)) / MAX * pw;
+    const Y = f => base - f / yMax * (base - top);
+    const svg = svgEl('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+    if (animate) svg.classList.add('is-new');
+    sum.dist.replaceChildren(svg, tip);
+    active = -1;
+    tip.hidden = true;
+
+    for (let k = 1; k <= Math.round(yMax * 20); k++) {          // a hairline every 5% of games
+      const y = Math.round(Y(k / 20)) + .5;
+      svgEl('line', { class: 'd-grid', x1: left, x2: W - right, y1: y, y2: y }, svg);
+      svgEl('text', { class: 'd-tick', x: left - 8, y: y + 4, 'text-anchor': 'end' }, svg).textContent = `${k * 5}%`;
+    }
+    svgEl('line', { class: 'd-axis', x1: left, x2: W - right, y1: base + .5, y2: base + .5 }, svg);
+    const compact = pw < 300;                        // on a phone the full numbers would touch: 5K, 10K, ...
+    for (let v = 0; v <= MAX; v += 5000) {
+      svgEl('text', { class: 'd-tick', x: X(v), y: base + 20, 'text-anchor': v === 0 ? 'start' : v === MAX ? 'end' : 'middle' }, svg)
+        .textContent = compact && v ? `${v / 1000}K` : nf.format(v);
+    }
+    // bars: at most 24px wide, a 2px gap between neighbours, 4px rounded tops, square at the baseline
+    const bw = Math.min(24, slot - 2);
+    const bars = digCounts.map((c, i) => {
+      if (!c) return null;
+      const x = left + i * slot + (slot - bw) / 2, y = Y(share[i]), r = Math.min(4, base - y, bw / 2);
+      return svgEl('path', {
+        class: 'd-bar', style: `--i:${i}`,
+        d: `M${x} ${base}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + bw - r}Q${x + bw} ${y} ${x + bw} ${y + r}V${base}Z`,
+      }, svg);
+    });
+    // lines: your total and DIG-XL's on your five photos, each topped by a dot and a label with its total
+    const marks = [
+      { v: distData.you, cls: 'is-you', who: 'You' },
+      { v: distData.dig, cls: 'is-dig', who: OPP.name },
+    ].map(m => {
+      const g = svgEl('g', { class: `d-mark ${m.cls}` }, svg);
+      const line = svgEl('line', {}, g), dot = svgEl('circle', { r: 4 }, g), t = svgEl('text', {}, g);
+      svgEl('tspan', { class: 'd-who' }, t).textContent = m.who;
+      svgEl('tspan', { class: 'd-val', dx: 6 }, t).textContent = nf.format(m.v);
+      return { ...m, x: Math.round(X(m.v)) + .5, line, dot, t, w: t.getComputedTextLength() };
+    });
+    // Two label rows. The upper marker's line runs down through the lower row, so the lower label must
+    // stay clear of it: centred on its own line if it can, else on the side away from the other line.
+    // You take the top row unless only the swap keeps both labels beside their own lines.
+    const ROWS = [16, 44];
+    const centred = m => (m.x - m.w / 2 < 2 ? [2, 'start'] : m.x + m.w / 2 > W - 2 ? [W - 2, 'end'] : [m.x, 'middle']);
+    const clear = (m, [x, anchor], other) => {
+      const a = anchor === 'start' ? x : anchor === 'end' ? x - m.w : x - m.w / 2;
+      return other.x < a - 6 || other.x > a + m.w + 6;
+    };
+    const lowerSpot = (m, other) => {
+      const c = centred(m);
+      if (clear(m, c, other)) return c;
+      if (m.x >= other.x && m.x + 7 + m.w <= W - 2) return [m.x + 7, 'start'];
+      if (m.x < other.x && m.x - 7 - m.w >= 2) return [m.x - 7, 'end'];
+      return null;
+    };
+    const [me, dig] = marks;
+    let upper = me, lower = dig, spot = lowerSpot(dig, me);
+    if (!spot) {
+      const swapped = lowerSpot(me, dig);
+      if (swapped) { upper = dig; lower = me; spot = swapped; }
+      else spot = dig.x >= me.x ? [me.x - 8, 'end'] : [me.x + 8, 'start'];   // last resort: beside your line
+    }
+    const put = (m, y, [x, anchor]) => {
+      Object.entries({ x, y, 'text-anchor': anchor }).forEach(([k, v]) => m.t.setAttribute(k, v));
+      Object.entries({ cx: m.x, cy: y + 10 }).forEach(([k, v]) => m.dot.setAttribute(k, v));
+      Object.entries({ x1: m.x, x2: m.x, y1: y + 10, y2: base }).forEach(([k, v]) => m.line.setAttribute(k, v));
+    };
+    put(upper, ROWS[0], centred(upper));
+    put(lower, ROWS[1], spot);
+    // hover and touch: the whole column under the pointer is the target, not just its bar
+    const hit = svgEl('rect', { class: 'd-hit', x: left, y: top - 8, width: pw, height: base - top + 8 }, svg);
+    const binAt = e => Math.max(0, Math.min(NBINS - 1, Math.floor((e.clientX - svg.getBoundingClientRect().left - left) / slot)));
+    hit.addEventListener('pointermove', e => setActive(binAt(e)));
+    hit.addEventListener('pointerdown', e => setActive(binAt(e)));
+    hit.addEventListener('pointerleave', () => setActive(-1));
+    view = { W, left, slot, base, Y, share, bars };
+  }
+
+  function setActive(i, announce) {
+    if (!view) return;
+    if (active >= 0 && view.bars[active]) view.bars[active].classList.remove('is-on');
+    active = i;
+    if (i < 0) { tip.hidden = true; return; }
+    if (view.bars[i]) view.bars[i].classList.add('is-on');
+    tipVal.textContent = sharePct(digCounts[i]);
+    tipText.textContent = ` of games scored ${binRange(i)}`;
+    tip.hidden = false;
+    const cx = view.left + (i + .5) * view.slot, w = tip.offsetWidth;
+    tip.style.left = `${Math.max(w / 2 + 2, Math.min(view.W - w / 2 - 2, cx))}px`;
+    tip.style.top = `${(view.bars[i] ? view.Y(view.share[i]) : view.base) - 10}px`;
+    if (announce) sum.live.textContent = `${tipVal.textContent}${tipText.textContent}.`;
+  }
+
+  // keyboard: the arrow keys step through the bars, starting from the one your total falls in
+  const youBin = () => Math.min(NBINS - 1, Math.floor(distData.you / BIN));
+  sum.dist.addEventListener('keydown', e => {
+    if (!view) return;
+    const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+    let i;
+    if (step) i = active < 0 ? youBin() : Math.max(0, Math.min(NBINS - 1, active + step));
+    else if (e.key === 'Home') i = 0;
+    else if (e.key === 'End') i = NBINS - 1;
+    else return;
+    e.preventDefault();
+    setActive(i, true);
+  });
+  sum.dist.addEventListener('focus', () => { if (view && active < 0 && sum.dist.matches(':focus-visible')) setActive(youBin(), true); });
+  sum.dist.addEventListener('blur', () => setActive(-1));
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(() => requestAnimationFrame(() => {
+      if (view && !sum.box.hidden && Math.floor(sum.dist.clientWidth) !== view.W) drawDist(false);
+    })).observe(sum.dist);
+  }
 
   // ── enlarged photo (up to 2x its native size) ──
   if (box && typeof box.showModal === 'function') {
@@ -412,8 +703,11 @@
       const k = want ? photos.findIndex(p => p.id === want) : -1;
       if (k >= 0) { order.splice(order.indexOf(k), 1); order.unshift(k); }
       buildMap();
+      prog.pips = Array.from({ length: ROUNDS }, () => prog.list.appendChild(document.createElement('li')));
+      root.querySelector('[data-rounds]').textContent = String(ROUNDS);
+      prog.box.hidden = false;
       board.dataset.state = 'ready';
-      next();
+      newGame();
     }).catch(err => {
       board.dataset.state = 'error';
       loading.textContent = 'The game could not load. Please refresh the page to try again.';
