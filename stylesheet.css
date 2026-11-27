@@ -105,10 +105,11 @@ h2 {
   transition: background-color .15s ease-in-out, color .15s ease-in-out, border-color .15s ease-in-out;
 }
 
+/* buttons turn the same orange as links on hover */
 .btn:hover,
 .btn:focus {
-  background: #1772d0;
-  border-color: #1772d0;
+  background: #f09228;
+  border-color: #f09228;
   color: #fff;
   text-decoration: none;
 }
@@ -155,7 +156,7 @@ h2 {
 }
 
 .bibtex-modal-close:hover {
-  color: #1772d0;
+  color: #f09228;
 }
 
 .go-bibtex-box {
@@ -340,8 +341,9 @@ h2 {
   border-left: 1px solid #d8dce2;
 }
 
-.pub-toggle-btn:hover {
-  background: #e9eef5;
+.pub-toggle-btn:hover:not([aria-pressed="true"]) {
+  background: #f09228;
+  color: #fff;
 }
 
 .pub-toggle-btn[aria-pressed="true"] {
@@ -488,4 +490,30 @@ span.highlight {
     padding: 20px;
     display: inline-block;
     border-radius: 10px;
+}
+/* About: the text and the photo sit side by side, close together, centred as a pair;
+   on a phone the photo goes on top */
+.intro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+.intro-text { flex: 1 1 0; min-width: 0; }
+.intro-photo { flex: 0 0 auto; display: block; line-height: 0; }
+.intro-photo img {
+  display: block;
+  width: 190px;
+  height: auto;
+  aspect-ratio: 7 / 8;
+  object-fit: cover;
+  border-radius: 16px;
+}
+@media (max-width: 640px) {
+  .intro { flex-direction: column; gap: 4px; padding-top: 12px; }
+  .intro-photo { order: -1; }
+  .intro-photo img { width: 150px; }
 }
