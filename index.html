@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-    <link rel="stylesheet" type="text/css" href="stylesheet.css?v=16">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css?v=21">
 
     <script type="importmap">
     { "imports": { "three": "./tte-globe/js/three.module.js", "three/addons/": "./tte-globe/js/jsm/" } }
@@ -27,6 +27,7 @@
     <nav class="site-nav">
       <div class="site-nav-inner">
         <a href="#about">About</a>
+        <a href="#research">Research</a>
         <a href="#publications">Publications</a>
         <a href="#projects">Projects</a>
       </div>
@@ -46,7 +47,7 @@
                 I also completed my Bachelor's degree in Data Science with a minor in Economics at WashU, where I conducted research advised by <a href="https://sds.wustl.edu/people/nan-lin">Dr. Nan Lin</a> and Dr. Jacobs.
                 </p>
                 <p>
-                I am interested in generative modeling, multimodal representation learning, and computer vision. My work has so far focused on geospatial and ecological applications; please see my publications below for more details.
+                My research focuses on the intersection of generative modeling and multimodal representation learning, with applications to geospatial and ecological domains; please see my publications below for more details.
                 </p>
                 <div class="btn-row btn-row-center">
                   <a class="btn" href="mailto:b.j.wei@wustl.edu"><i class="fas fa-envelope"></i> Email</a>
@@ -59,11 +60,11 @@
               <a class="intro-photo" href="images/pfp_nashville.webp"><img width="490" height="560" alt="profile photo" src="images/pfp_nashville.webp" class="hoverZoomLink"></a>
           </div>
 
-          <!-- NEWS -->
-          <table id="news" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <!-- UPDATES -->
+          <table id="updates" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
             <tr>
               <td style="padding:16px 4px;width:100%;vertical-align:middle">
-                <h2>News</h2>
+                <h2>Updates</h2>
                 <ul class="timeline">
                   <li>
                     <span class="timeline-date">Nov 2026</span>
@@ -86,7 +87,37 @@
             </tr>
           </tbody></table>
 
-          
+          <!-- Research: two themes side by side; "See related publications" filters the list below -->
+          <table id="research" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+            <tr>
+              <td style="padding:16px 4px;width:100%;vertical-align:middle">
+                <h2>Research</h2>
+                <div class="research-grid">
+                  <article class="research-card">
+                    <div class="research-visual">
+                      <img width="800" height="235" src="images/thumbs/research_dig.webp" alt="DIG: noise in a location representation space is diffused into a geolocation, then decoded to coordinates" loading="lazy">
+                    </div>
+                    <div class="research-body">
+                      <h3>Taming Generative Models for Downstream Applications</h3>
+                      <p>Beyond producing hyperrealistic imagery, diffusion models can be powerful tools for downstream tasks. I work on diffusion foundation models for satellite imagery that can be controlled with structured geospatial conditions and on using diffusion for prediction tasks such as image geolocalization.</p>
+                      <a class="research-link" href="#publications" data-topic="generative">See related publications <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                  </article>
+                  <article class="research-card">
+                    <div class="research-visual">
+                      <img width="400" height="377" src="images/thumbs/research_tte.webp" alt="TTE: the globe tessellated into learned Voronoi cells, coloured by their representations" loading="lazy">
+                    </div>
+                    <div class="research-body">
+                      <h3>Representations for Spatiotemporal Understanding</h3>
+                      <p>Where and when something happens carries rich structure. I study encoders that turn coordinates and timestamps into learned representations, from adaptive tessellations of space and time to latent spaces for generative models.</p>
+                      <a class="research-link" href="#publications" data-topic="representation">See related publications <span aria-hidden="true">&rarr;</span></a>
+                    </div>
+                  </article>
+                </div>
+              </td>
+            </tr>
+          </tbody></table>
+
           <!-- Publications -->
           <table id="publications" class="show-selected" style="width:100%;border:0px;border-spacing:0 14px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
             <tr>
@@ -98,10 +129,15 @@
                     <button type="button" class="pub-toggle-btn" data-filter="all" aria-pressed="false">All</button>
                   </div>
                 </div>
+                <div class="pub-topics" role="group" aria-label="Filter publications by topic">
+                  <button type="button" class="pub-topic" data-topic="generative" aria-pressed="false">Generative Models</button>
+                  <button type="button" class="pub-topic" data-topic="representation" aria-pressed="false">Representation Learning</button>
+                  <button type="button" class="pub-topic-clear" hidden>&times; Show all</button>
+                </div>
               </td>
             </tr>
 
-            <tr class="pub pub-selected">
+            <tr class="pub pub-selected" data-topics="generative representation">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one hover-video">
                   <div class="two" id='psm_image'>
@@ -139,7 +175,7 @@
             </tr>
 
 
-            <tr class="pub">
+            <tr class="pub" data-topics="representation">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one hover-video">
                   <div class="two" id='psm_image'>
@@ -174,7 +210,7 @@
             </tr>
 
 
-            <tr class="pub">
+            <tr class="pub" data-topics="generative">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one">
                   <div class="two" id='psm_image'>
@@ -212,7 +248,7 @@
             </tr>
 
 
-            <tr class="pub pub-selected">
+            <tr class="pub pub-selected" data-topics="generative">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one hover-video" id="omega-anim-card" style="text-align:center;">
                   <div class="two" id='psm_image'>
@@ -251,7 +287,7 @@
             </tr>
 
 
-            <tr class="pub">
+            <tr class="pub" data-topics="representation">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one" id="tte-globe-card">
                   <div class="two" id='psm_image'>
@@ -288,7 +324,7 @@
             </tr>
 
 
-            <tr class="pub">
+            <tr class="pub" data-topics="generative">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one hover-video">
                   <div class="two" id='psm_image'>
@@ -328,7 +364,7 @@
             </tr>
 
 
-            <tr class="pub pub-selected">
+            <tr class="pub pub-selected" data-topics="generative">
               <td class="pub-teaser" style="padding:20px;width:25%;vertical-align:middle">
                 <div class="one">
                   <div class="two" id='psm_image'>
@@ -518,15 +554,42 @@
         card.addEventListener('mouseleave', () => video.pause());
       });
 
-      // Publications filter: Selected vs. All (selected rows have class "pub-selected").
+      // Publications filter. Three states:
+      //   Selected (rows with class "pub-selected"), All, or a topic (rows whose data-topics
+      //   contains it). While a topic is on, the "All" button reads "Filtered".
       const pubTable = document.getElementById('publications');
       const pubButtons = document.querySelectorAll('.pub-toggle-btn');
-      pubButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          pubTable.classList.toggle('show-selected', btn.dataset.filter === 'selected');
-          pubButtons.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      const allBtn = document.querySelector('.pub-toggle-btn[data-filter="all"]');
+      const topicBtns = document.querySelectorAll('.pub-topic');
+      const clearBtn = document.querySelector('.pub-topic-clear');
+      const pubRows = pubTable.querySelectorAll('tr.pub');
+
+      function setPubFilter(mode, topic) {   // mode: 'selected' | 'all' | 'topic'
+        pubTable.classList.toggle('show-selected', mode === 'selected');
+        pubRows.forEach(r => {
+          r.hidden = mode === 'topic' && !(r.dataset.topics || '').split(' ').includes(topic);
         });
-      });
+        pubButtons.forEach(b => b.setAttribute('aria-pressed',
+          String(b.dataset.filter === (mode === 'selected' ? 'selected' : 'all'))));
+        allBtn.textContent = mode === 'topic' ? 'Filtered' : 'All';
+        topicBtns.forEach(b => b.setAttribute('aria-pressed', String(mode === 'topic' && b.dataset.topic === topic)));
+        clearBtn.hidden = mode !== 'topic';
+      }
+
+      pubButtons.forEach(btn => btn.addEventListener('click', () => setPubFilter(btn.dataset.filter)));
+      topicBtns.forEach(btn => btn.addEventListener('click', () => {
+        const on = btn.getAttribute('aria-pressed') === 'true';
+        setPubFilter(on ? 'all' : 'topic', btn.dataset.topic);
+      }));
+      clearBtn.addEventListener('click', () => setPubFilter('all'));
+
+      // Research cards: jump to Publications already filtered to that theme.
+      document.querySelectorAll('.research-link').forEach(a => a.addEventListener('click', e => {
+        e.preventDefault();
+        setPubFilter('topic', a.dataset.topic);
+        pubTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#publications');
+      }));
     })();
     </script>
 
